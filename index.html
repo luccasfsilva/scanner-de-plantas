@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistente de Plantas — diagnóstico por foto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-dark:#241811;
+    --panel:#2E2013;
+    --moss:#7C9A63;
+    --moss-dim:#5C7548;
+    --clay:#C08A45;
+    --parchment:#EFE7D8;
+    --parchment-dim:#C9BEA9;
+    --amber:#D9A441;
+    --danger:#C1613F;
+    --ok-bg:rgba(124,154,99,0.16); --ok-bd:rgba(124,154,99,0.45); --ok-fg:#9DBF88;
+    --warn-bg:rgba(217,164,65,0.14); --warn-bd:rgba(217,164,65,0.45); --warn-fg:#E3B662;
+    --bad-bg:rgba(193,97,63,0.14); --bad-bd:rgba(193,97,63,0.5); --bad-fg:#DD8A6C;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--soil-dark);
+    color:var(--parchment);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    line-height:1.55;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif; font-weight:600; margin:0 0 .3em 0; letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .wrap{max-width:900px; margin:0 auto; padding:28px 20px 80px;}
+
+  header.top{margin-bottom:26px; border-bottom:1px solid rgba(239,231,216,0.12); padding-bottom:18px;}
+  header.top .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--moss);}
+  header.top h1{font-size:30px;}
+  header.top p{color:var(--parchment-dim); font-size:14.5px; margin:6px 0 0; max-width:60ch;}
+
+  .card{background:var(--panel); border-radius:var(--radius); padding:22px; border:1px solid rgba(239,231,216,0.08); margin-bottom:20px;}
+  .card h2{font-size:19px;}
+  .card .sub{color:var(--parchment-dim); font-size:13.5px; margin-top:-6px; margin-bottom:14px;}
+
+  .cam-frame{position:relative; width:100%; aspect-ratio:4/3; background:#140d08; border-radius:10px; overflow:hidden; border:1px dashed rgba(239,231,216,0.25);}
+  video, .cam-frame img{width:100%; height:100%; object-fit:cover; display:block;}
+  .cam-empty{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; color:var(--parchment-dim); text-align:center; padding:20px;}
+  .cam-empty svg{opacity:.5;}
+
+  .controls{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  button, .filebtn{font-family:'Work Sans', sans-serif; font-weight:600; font-size:14px; padding:11px 18px; border-radius:8px; border:none; cursor:pointer; transition:transform .12s ease, filter .12s ease;}
+  button:active, .filebtn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--moss); color:#16210F;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed;}
+  .btn-secondary{background:transparent; color:var(--parchment); border:1px solid rgba(239,231,216,0.3);}
+  .btn-secondary:hover{border-color:var(--parchment);}
+  input[type=file]{display:none;}
+  .hint{font-size:12px; color:var(--parchment-dim); margin-top:10px;}
+  canvas{display:none;}
+
+  .diagnose-btn{width:100%; padding:14px; font-size:15px; margin-top:18px;}
+
+  .loading{display:flex; align-items:center; gap:12px; padding:16px 4px; color:var(--parchment-dim); font-size:14px;}
+  .spinner{width:18px; height:18px; border-radius:50%; border:2px solid rgba(239,231,216,0.25); border-top-color:var(--moss); animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .health-banner{display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:10px; margin-bottom:18px;}
+  .health-banner .id{font-size:12px; color:var(--parchment-dim); margin-top:2px;}
+
+  .diag-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:6px;}
+  .diag-item{border-radius:10px; padding:16px; border:1px solid; }
+  .diag-item .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .diag-item .head .name{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.08em; display:flex; align-items:center; gap:6px;}
+  .badge{font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:3px 9px; border-radius:20px; font-weight:500;}
+  .diag-item p{margin:0 0 8px 0; font-size:14px;}
+  .diag-item .action{font-size:13px; font-weight:600;}
+  .diag-item .action::before{content:"→ ";}
+
+  .status-ok{background:var(--ok-bg); border-color:var(--ok-bd);}
+  .status-ok .badge{background:rgba(124,154,99,0.25); color:var(--ok-fg);}
+  .status-warn{background:var(--warn-bg); border-color:var(--warn-bd);}
+  .status-warn .badge{background:rgba(217,164,65,0.25); color:var(--warn-fg);}
+  .status-bad{background:var(--bad-bg); border-color:var(--bad-bd);}
+  .status-bad .badge{background:rgba(193,97,63,0.25); color:var(--bad-fg);}
+  .status-unk{background:rgba(239,231,216,0.06); border-color:rgba(239,231,216,0.18);}
+  .status-unk .badge{background:rgba(239,231,216,0.12); color:var(--parchment-dim);}
+
+  ul.notes{list-style:none; padding:0; margin:16px 0 0;}
+  ul.notes li{padding:9px 0 9px 20px; position:relative; border-top:1px solid rgba(239,231,216,0.08); font-size:14px;}
+  ul.notes li:first-child{border-top:none;}
+  ul.notes li::before{content:"•"; position:absolute; left:2px; color:var(--clay);}
+
+  .confidence{font-size:12px; color:var(--parchment-dim); margin-top:16px; font-family:'IBM Plex Mono',monospace;}
+
+  .disclaimer{font-size:12.5px; color:var(--parchment-dim); background:rgba(193,97,63,0.1); border:1px solid rgba(193,97,63,0.35); border-radius:8px; padding:12px 14px; margin-top:6px;}
+  .disclaimer b{color:var(--danger);}
+
+  details{margin-top:6px;}
+  summary{cursor:pointer; font-size:13.5px; color:var(--moss); font-weight:600; padding:4px 0;}
+  summary::-webkit-details-marker{color:var(--moss);}
+
+  .error-box{background:rgba(193,97,63,0.14); border:1px solid rgba(193,97,63,0.4); border-radius:10px; padding:14px 16px; font-size:14px; color:var(--parchment);}
+
+  footer{text-align:center; color:var(--parchment-dim); font-size:12px; margin-top:36px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">Diagnóstico por imagem</div>
+    <h1>Assistente de Plantas</h1>
+    <p>Fotografe sua planta e receba um diagnóstico: se ela precisa de mais água, mais sol, se o vaso está com pouca ou muita terra, e o que fazer a respeito.</p>
+  </header>
+
+  <!-- Capture card -->
+  <div class="card">
+    <h2>1. Fotografe a planta</h2>
+    <div class="sub">Enquadre a planta inteira, com boa luz natural. Se possível, inclua o vaso/base para avaliarmos a terra.</div>
+
+    <div class="cam-frame" id="camFrame">
+      <div class="cam-empty" id="camEmpty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h3l2-2h6l2 2h3v12H4V7z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        <div>Nenhuma foto ainda</div>
+      </div>
+      <video id="video" autoplay playsinline style="display:none;"></video>
+      <img id="capturedImg" style="display:none;">
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <div class="controls">
+      <button class="btn-primary" id="startCam">Ligar câmera</button>
+      <button class="btn-primary" id="shootBtn" style="display:none;">Tirar foto</button>
+      <label class="filebtn btn-secondary" for="fileInput">Enviar foto</label>
+      <input type="file" id="fileInput" accept="image/*" capture="environment">
+      <button class="btn-secondary" id="resetBtn" style="display:none;">Trocar foto</button>
+    </div>
+    <div class="hint">A foto é analisada e não é armazenada em nenhum servidor além da chamada do modelo de visão.</div>
+
+    <button class="btn-primary diagnose-btn" id="diagnoseBtn" style="display:none;" disabled>Diagnosticar planta</button>
+    <div class="loading" id="loadingBox" style="display:none;">
+      <div class="spinner"></div>
+      <span id="loadingText">Analisando folhas, terra e sinais de luz…</span>
+    </div>
+    <div id="errorBox"></div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsArea" style="display:none;">
+
+    <div class="card">
+      <div class="health-banner" id="healthBanner">
+        <div>
+          <h2 id="healthTitle" style="font-size:18px; margin-bottom:2px;">—</h2>
+          <div class="id" id="plantId"></div>
+        </div>
+      </div>
+
+      <div class="diag-grid" id="diagGrid"></div>
+
+      <details id="notesDetails" style="display:none;">
+        <summary>Outros sinais observados</summary>
+        <ul class="notes" id="notesList"></ul>
+      </details>
+
+      <div class="confidence" id="confidenceLine"></div>
+    </div>
+
+    <div class="disclaimer">
+      <b>Sobre este diagnóstico:</b> é uma leitura visual automatizada a partir de uma única foto — fatores como espécie exata, histórico de rega, clima local e pragas nem sempre são visíveis na imagem. Use como um primeiro direcionamento, não como diagnóstico definitivo. Em caso de dúvida persistente, consulte um viveiro local ou agrônomo.
+    </div>
+  </div>
+
+  <footer>Diagnóstico gerado por modelo de visão · nenhuma foto é salva</footer>
+</div>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const capturedImg = document.getElementById('capturedImg');
+const camEmpty = document.getElementById('camEmpty');
+const startCam = document.getElementById('startCam');
+const shootBtn = document.getElementById('shootBtn');
+const resetBtn = document.getElementById('resetBtn');
+const fileInput = document.getElementById('fileInput');
+const diagnoseBtn = document.getElementById('diagnoseBtn');
+const loadingBox = document.getElementById('loadingBox');
+const loadingText = document.getElementById('loadingText');
+const errorBox = document.getElementById('errorBox');
+const resultsArea = document.getElementById('resultsArea');
+
+let stream = null;
+let currentImageBase64 = null; // without data: prefix
+let currentMediaType = 'image/jpeg';
+
+const LOADING_MESSAGES = [
+  'Observando a cor das folhas…',
+  'Checando sinais de água e luz…',
+  'Avaliando o volume de terra no vaso…',
+  'Montando as recomendações…'
+];
+let loadingInterval = null;
+
+startCam.addEventListener('click', async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    video.srcObject = stream;
+    video.style.display = 'block';
+    camEmpty.style.display = 'none';
+    startCam.style.display = 'none';
+    shootBtn.style.display = 'inline-block';
+  } catch (err) {
+    alert('Não foi possível acessar a câmera. Use "Enviar foto" para escolher uma imagem da galeria.');
+  }
+});
+
+shootBtn.addEventListener('click', () => {
+  const w = video.videoWidth, h = video.videoHeight;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, w, h);
+  setImageFromCanvas();
+  stopCamera();
+});
+
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 1024;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        const scale = maxDim / Math.max(w,h);
+        w = Math.round(w*scale); h = Math.round(h*scale);
+      }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      setImageFromCanvas();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+resetBtn.addEventListener('click', () => {
+  capturedImg.style.display = 'none';
+  camEmpty.style.display = 'flex';
+  resultsArea.style.display = 'none';
+  resetBtn.style.display = 'none';
+  startCam.style.display = 'inline-block';
+  shootBtn.style.display = 'none';
+  diagnoseBtn.style.display = 'none';
+  errorBox.innerHTML = '';
+  currentImageBase64 = null;
+});
+
+function stopCamera(){
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  video.style.display = 'none';
+  shootBtn.style.display = 'none';
+}
+
+function setImageFromCanvas(){
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  capturedImg.src = dataUrl;
+  capturedImg.style.display = 'block';
+  camEmpty.style.display = 'none';
+  resetBtn.style.display = 'inline-block';
+  startCam.style.display = 'none';
+  diagnoseBtn.style.display = 'block';
+  diagnoseBtn.disabled = false;
+  resultsArea.style.display = 'none';
+  errorBox.innerHTML = '';
+
+  currentImageBase64 = dataUrl.split(',')[1];
+  currentMediaType = 'image/jpeg';
+}
+
+diagnoseBtn.addEventListener('click', async () => {
+  if (!currentImageBase64) return;
+  diagnoseBtn.disabled = true;
+  loadingBox.style.display = 'flex';
+  errorBox.innerHTML = '';
+  resultsArea.style.display = 'none';
+
+  let msgIdx = 0;
+  loadingText.textContent = LOADING_MESSAGES[0];
+  loadingInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
+    loadingText.textContent = LOADING_MESSAGES[msgIdx];
+  }, 1800);
+
+  try {
+    const diagnosis = await requestDiagnosis(currentImageBase64, currentMediaType);
+    renderDiagnosis(diagnosis);
+  } catch (err) {
+    console.error(err);
+    errorBox.innerHTML = `<div class="error-box">Não consegui concluir o diagnóstico agora (${escapeHtml(err.message || 'erro desconhecido')}). Verifique a conexão e tente novamente.</div>`;
+  } finally {
+    clearInterval(loadingInterval);
+    loadingBox.style.display = 'none';
+    diagnoseBtn.disabled = false;
+  }
+});
+
+async function requestDiagnosis(base64, mediaType){
+  const systemPrompt = `Você é um assistente especializado em cuidado de plantas domésticas e de jardim. Você recebe uma foto de uma planta (às vezes incluindo vaso/terra) e deve dar um diagnóstico visual prático.
+
+Responda SOMENTE com um objeto JSON válido, sem markdown, sem crases, sem texto antes ou depois. Use exatamente este formato:
+
+{
+  "saude_geral": "uma frase curta e direta sobre a condição geral aparente",
+  "planta_identificada": "nome comum aproximado da planta se for reconhecível, ou null se não for possível identificar",
+  "agua": {"status": "baixa" | "adequada" | "excesso" | "indeterminado", "diagnostico": "o que na imagem indica isso, em 1-2 frases", "acao": "recomendação prática e curta"},
+  "luz": {"status": "pouca" | "adequada" | "excesso" | "indeterminado", "diagnostico": "1-2 frases", "acao": "recomendação prática e curta"},
+  "solo_vaso": {"status": "pouca_terra" | "terra_adequada" | "terra_em_excesso" | "vaso_pequeno" | "indeterminado", "diagnostico": "1-2 frases", "acao": "recomendação prática e curta"},
+  "outros_sintomas": ["lista curta de outros sinais visíveis, ex: pragas, fungo, folhas amareladas nas pontas — pode ser vazia"],
+  "confianca": "baixa" | "media" | "alta"
+}
+
+Baseie-se em sinais visuais reais: cor e textura das folhas (amareladas, murchas, crocantes, manchas), postura da planta (caída, esticada em direção à luz, entrenós longos), aparência da terra (rachada e seca, encharcada, transbordando do vaso, muito pouca terra visível, raízes para fora), e proporção planta/vaso. Se a imagem não mostrar o vaso ou a terra, marque "solo_vaso" como "indeterminado" e explique isso no diagnostico. Seja honesto quando a imagem não permitir concluir algo com confiança — use "indeterminado" e "confianca": "baixa" nesses casos, em vez de inventar.`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+            { type: "text", text: "Analise esta planta e responda apenas com o JSON descrito, nada além disso." }
+          ]
+        }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Falha na chamada (status ${response.status})`);
+  }
+
+  const data = await response.json();
+  const textBlock = (data.content || []).find(c => c.type === 'text');
+  if (!textBlock) throw new Error('Resposta sem conteúdo de texto');
+
+  let clean = textBlock.text.trim();
+  clean = clean.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+
+  let parsed;
+  try {
+    parsed = JSON.parse(clean);
+  } catch (e) {
+    throw new Error('Não entendi a resposta do modelo — tente novamente');
+  }
+  return parsed;
+}
+
+const STATUS_META = {
+  // água
+  'adequada': {cls:'status-ok', label:'OK'},
+  'baixa': {cls:'status-warn', label:'ATENÇÃO'},
+  'excesso': {cls:'status-bad', label:'EXCESSO'},
+  // luz uses same baixa/adequada/excesso as above (pouca instead of baixa)
+  'pouca': {cls:'status-warn', label:'ATENÇÃO'},
+  // solo
+  'terra_adequada': {cls:'status-ok', label:'OK'},
+  'pouca_terra': {cls:'status-warn', label:'ATENÇÃO'},
+  'terra_em_excesso': {cls:'status-warn', label:'ATENÇÃO'},
+  'vaso_pequeno': {cls:'status-bad', label:'TROCAR VASO'},
+  'indeterminado': {cls:'status-unk', label:'SEM DADOS'}
+};
+
+function statusMeta(status){
+  return STATUS_META[status] || {cls:'status-unk', label:(status||'—').toUpperCase()};
+}
+
+function diagItem(name, icon, block){
+  if (!block) block = {status:'indeterminado', diagnostico:'Não foi possível avaliar.', acao:''};
+  const meta = statusMeta(block.status);
+  const div = document.createElement('div');
+  div.className = 'diag-item ' + meta.cls;
+  div.innerHTML = `
+    <div class="head">
+      <span class="name">${icon} ${name}</span>
+      <span class="badge">${meta.label}</span>
+    </div>
+    <p>${escapeHtml(block.diagnostico || '')}</p>
+    ${block.acao ? `<div class="action">${escapeHtml(block.acao)}</div>` : ''}
+  `;
+  return div;
+}
+
+function renderDiagnosis(d){
+  resultsArea.style.display = 'block';
+
+  document.getElementById('healthTitle').textContent = d.saude_geral || 'Diagnóstico concluído';
+  document.getElementById('plantId').textContent = d.planta_identificada ? `Planta identificada: ${d.planta_identificada}` : 'Espécie não identificada com certeza';
+
+  const grid = document.getElementById('diagGrid');
+  grid.innerHTML = '';
+  grid.appendChild(diagItem('Água', '💧', d.agua));
+  grid.appendChild(diagItem('Luz', '☀️', d.luz));
+  grid.appendChild(diagItem('Terra / vaso', '🪴', d.solo_vaso));
+
+  const notesDetails = document.getElementById('notesDetails');
+  const notesList = document.getElementById('notesList');
+  notesList.innerHTML = '';
+  if (d.outros_sintomas && d.outros_sintomas.length > 0){
+    d.outros_sintomas.forEach(n => {
+      const li = document.createElement('li');
+      li.textContent = n;
+      notesList.appendChild(li);
+    });
+    notesDetails.style.display = 'block';
+  } else {
+    notesDetails.style.display = 'none';
+  }
+
+  const confMap = {alta:'alta', media:'média', baixa:'baixa'};
+  document.getElementById('confidenceLine').textContent =
+    'Confiança do diagnóstico: ' + (confMap[d.confianca] || d.confianca || 'não informada');
+
+  resultsArea.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
