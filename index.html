@@ -3,128 +3,269 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Assistente de Plantas — diagnóstico por foto</title>
+<title>Frondly — diagnóstico de plantas por foto</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --soil-dark:#241811;
-    --panel:#2E2013;
-    --moss:#7C9A63;
-    --moss-dim:#5C7548;
-    --clay:#C08A45;
-    --parchment:#EFE7D8;
-    --parchment-dim:#C9BEA9;
-    --amber:#D9A441;
-    --danger:#C1613F;
-    --ok-bg:rgba(124,154,99,0.16); --ok-bd:rgba(124,154,99,0.45); --ok-fg:#9DBF88;
-    --warn-bg:rgba(217,164,65,0.14); --warn-bd:rgba(217,164,65,0.45); --warn-fg:#E3B662;
-    --bad-bg:rgba(193,97,63,0.14); --bad-bd:rgba(193,97,63,0.5); --bad-fg:#DD8A6C;
-    --radius:14px;
+    --cream:#F6F2E9;
+    --cream-2:#EFEADC;
+    --forest:#25392A;
+    --forest-soft:#3C5443;
+    --sage:#7C9473;
+    --sage-light:#E3EAD9;
+    --sage-lighter:#EEF3E6;
+    --amber:#D2A23C;
+    --amber-light:#F6EAD0;
+    --rust:#B5674A;
+    --rust-light:#F3E0D6;
+    --white:#FFFFFF;
+    --ink-dim:#6B7566;
+    --r-lg:26px;
+    --r-md:18px;
+    --r-sm:12px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--soil-dark);
-    color:var(--parchment);
+    background:var(--cream);
+    color:var(--forest);
     font-family:'Work Sans', sans-serif;
     min-height:100vh;
     line-height:1.55;
+    position:relative;
+    overflow-x:hidden;
   }
-  h1,h2,h3{font-family:'Fraunces', serif; font-weight:600; margin:0 0 .3em 0; letter-spacing:-0.01em;}
-  .mono{font-family:'IBM Plex Mono', monospace;}
-  .wrap{max-width:900px; margin:0 auto; padding:28px 20px 80px;}
+  h1,h2{font-family:'Fraunces', serif; font-weight:600; margin:0; letter-spacing:-0.01em; color:var(--forest);}
 
-  header.top{margin-bottom:26px; border-bottom:1px solid rgba(239,231,216,0.12); padding-bottom:18px;}
-  header.top .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--moss);}
-  header.top h1{font-size:30px;}
-  header.top p{color:var(--parchment-dim); font-size:14.5px; margin:6px 0 0; max-width:60ch;}
+  /* ---------- Decorative blobs (like reference) ---------- */
+  .blob-tl{
+    position:fixed; top:-90px; left:-90px; width:280px; height:280px;
+    background:var(--sage); opacity:.55;
+    border-radius:38% 62% 60% 40% / 45% 40% 60% 55%;
+    z-index:0; pointer-events:none;
+  }
+  .leaf-tr{
+    position:fixed; top:-40px; right:-60px; width:220px; height:260px; z-index:0; pointer-events:none;
+    opacity:.5;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:34px 20px 90px; position:relative; z-index:1;}
 
-  .card{background:var(--panel); border-radius:var(--radius); padding:22px; border:1px solid rgba(239,231,216,0.08); margin-bottom:20px;}
-  .card h2{font-size:19px;}
-  .card .sub{color:var(--parchment-dim); font-size:13.5px; margin-top:-6px; margin-bottom:14px;}
+  /* ---------- Nav-style header ---------- */
+  .nav-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:34px;
+  }
+  .brand{display:flex; align-items:center; gap:9px; font-family:'Fraunces', serif; font-weight:700; font-size:18px; color:var(--forest);}
+  .brand .mark{
+    width:32px; height:32px; border-radius:9px; background:var(--forest);
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .nav-pill{
+    font-size:12.5px; font-weight:700; color:var(--white); background:var(--forest);
+    padding:9px 18px; border-radius:99px; letter-spacing:.01em;
+  }
 
-  .cam-frame{position:relative; width:100%; aspect-ratio:4/3; background:#140d08; border-radius:10px; overflow:hidden; border:1px dashed rgba(239,231,216,0.25);}
+  /* ---------- Hero ---------- */
+  .hero{text-align:left; margin-bottom:30px;}
+  .eyebrow-pill{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:11.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--forest-soft); background:var(--sage-lighter);
+    border:1px solid var(--sage-light);
+    padding:6px 14px; border-radius:99px; margin-bottom:14px;
+  }
+  .eyebrow-pill .dot{width:6px; height:6px; border-radius:50%; background:var(--sage);}
+  .hero h1{font-size:34px; line-height:1.18; max-width:16ch;}
+  .hero p{color:var(--ink-dim); font-size:15px; margin:12px 0 0; max-width:46ch; font-weight:500;}
+
+  /* ---------- Card (white, soft shadow, like reference cards) ---------- */
+  .card{
+    background:var(--white);
+    border-radius:var(--r-lg);
+    padding:26px;
+    margin-bottom:20px;
+    box-shadow:0 10px 34px -14px rgba(37,57,42,0.14);
+    border:1px solid rgba(37,57,42,0.06);
+  }
+  .card h2{font-size:19px; margin-bottom:5px;}
+  .card .sub{color:var(--ink-dim); font-size:13.5px; margin-bottom:18px; font-weight:500;}
+  .step-tag{
+    font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--sage); margin-bottom:8px; display:block;
+  }
+
+  /* ---------- Camera area ---------- */
+  .cam-frame{
+    position:relative; width:100%; aspect-ratio:4/3;
+    background:var(--sage-lighter);
+    border-radius:var(--r-md); overflow:hidden;
+    border:1.5px dashed var(--sage-light);
+  }
   video, .cam-frame img{width:100%; height:100%; object-fit:cover; display:block;}
-  .cam-empty{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:10px; color:var(--parchment-dim); text-align:center; padding:20px;}
-  .cam-empty svg{opacity:.5;}
+  .cam-empty{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    height:100%; gap:12px; color:var(--forest-soft); text-align:center; padding:20px;
+  }
+  .cam-empty .icon-circle{
+    width:58px; height:58px; border-radius:50%;
+    background:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 18px -8px rgba(37,57,42,0.25);
+  }
+  .cam-empty .txt{font-size:14px; font-weight:700;}
+  .cam-empty .txt-sub{font-size:12.5px; opacity:.75; margin-top:-4px; font-weight:500;}
 
-  .controls{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
-  button, .filebtn{font-family:'Work Sans', sans-serif; font-weight:600; font-size:14px; padding:11px 18px; border-radius:8px; border:none; cursor:pointer; transition:transform .12s ease, filter .12s ease;}
-  button:active, .filebtn:active{transform:scale(0.97);}
-  .btn-primary{background:var(--moss); color:#16210F;}
-  .btn-primary:hover{filter:brightness(1.08);}
-  .btn-primary:disabled{opacity:.4; cursor:not-allowed;}
-  .btn-secondary{background:transparent; color:var(--parchment); border:1px solid rgba(239,231,216,0.3);}
-  .btn-secondary:hover{border-color:var(--parchment);}
+  /* ---------- Buttons ---------- */
+  .controls{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+  button, .filebtn{
+    font-family:'Work Sans', sans-serif; font-weight:700; font-size:13.5px;
+    padding:12px 20px; border-radius:99px; border:none; cursor:pointer;
+    transition:transform .15s ease, filter .15s ease, box-shadow .15s ease;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  button:active, .filebtn:active{transform:scale(0.96);}
+  .btn-primary{
+    background:var(--forest); color:var(--white);
+    box-shadow:0 8px 22px -8px rgba(37,57,42,0.45);
+  }
+  .btn-primary:hover{background:var(--forest-soft);}
+  .btn-primary:disabled{opacity:.35; cursor:not-allowed; box-shadow:none;}
+  .btn-secondary{
+    background:var(--sage-lighter); color:var(--forest);
+    border:1px solid var(--sage-light);
+  }
+  .btn-secondary:hover{background:var(--sage-light);}
   input[type=file]{display:none;}
-  .hint{font-size:12px; color:var(--parchment-dim); margin-top:10px;}
+  .hint{font-size:12px; color:var(--ink-dim); margin-top:14px; font-weight:500; display:flex; gap:6px; align-items:flex-start;}
+  .hint svg{flex:none; margin-top:1px; opacity:.6;}
   canvas{display:none;}
 
-  .diagnose-btn{width:100%; padding:14px; font-size:15px; margin-top:18px;}
+  .diagnose-btn{width:100%; justify-content:center; padding:15px; font-size:14.5px; margin-top:20px;}
 
-  .loading{display:flex; align-items:center; gap:12px; padding:16px 4px; color:var(--parchment-dim); font-size:14px;}
-  .spinner{width:18px; height:18px; border-radius:50%; border:2px solid rgba(239,231,216,0.25); border-top-color:var(--moss); animation:spin .8s linear infinite;}
+  /* ---------- Loading ---------- */
+  .loading{display:flex; align-items:center; gap:12px; padding:18px 2px 4px; color:var(--ink-dim); font-size:13.5px; font-weight:600;}
+  .spinner{
+    width:20px; height:20px; border-radius:50%; flex:none;
+    border:2.5px solid var(--sage-light);
+    border-top-color:var(--sage);
+    animation:spin .8s linear infinite;
+  }
   @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes fadein{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
 
-  .health-banner{display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:10px; margin-bottom:18px;}
-  .health-banner .id{font-size:12px; color:var(--parchment-dim); margin-top:2px;}
+  /* ---------- Results ---------- */
+  #resultsArea{animation:fadein .5s ease both;}
 
-  .diag-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:6px;}
-  .diag-item{border-radius:10px; padding:16px; border:1px solid; }
-  .diag-item .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
-  .diag-item .head .name{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.08em; display:flex; align-items:center; gap:6px;}
-  .badge{font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:3px 9px; border-radius:20px; font-weight:500;}
-  .diag-item p{margin:0 0 8px 0; font-size:14px;}
-  .diag-item .action{font-size:13px; font-weight:600;}
-  .diag-item .action::before{content:"→ ";}
+  .health-banner{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    margin-bottom:22px; flex-wrap:wrap;
+  }
+  .health-banner h2{font-size:21px; line-height:1.32;}
+  .health-banner .id{font-size:12.5px; color:var(--ink-dim); margin-top:6px; font-weight:600;}
+  .conf-chip{
+    font-size:11px; font-weight:700; letter-spacing:.03em;
+    padding:6px 13px; border-radius:99px; white-space:nowrap; flex:none;
+  }
+  .conf-alta{background:var(--sage-light); color:var(--forest-soft);}
+  .conf-media{background:var(--amber-light); color:#8A6A22;}
+  .conf-baixa{background:var(--rust-light); color:#8C4A31;}
 
-  .status-ok{background:var(--ok-bg); border-color:var(--ok-bd);}
-  .status-ok .badge{background:rgba(124,154,99,0.25); color:var(--ok-fg);}
-  .status-warn{background:var(--warn-bg); border-color:var(--warn-bd);}
-  .status-warn .badge{background:rgba(217,164,65,0.25); color:var(--warn-fg);}
-  .status-bad{background:var(--bad-bg); border-color:var(--bad-bd);}
-  .status-bad .badge{background:rgba(193,97,63,0.25); color:var(--bad-fg);}
-  .status-unk{background:rgba(239,231,216,0.06); border-color:rgba(239,231,216,0.18);}
-  .status-unk .badge{background:rgba(239,231,216,0.12); color:var(--parchment-dim);}
+  /* diag items styled like the "Why Shop With" feature rows in the reference */
+  .diag-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px;}
+  .diag-item{
+    border-radius:var(--r-md); padding:18px;
+    border:1px solid rgba(37,57,42,0.07);
+    background:var(--cream);
+  }
+  .diag-item .head{display:flex; align-items:center; gap:11px; margin-bottom:11px;}
+  .diag-item .icon-badge{
+    width:38px; height:38px; border-radius:50%; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:17px;
+  }
+  .diag-item .name{font-size:13.5px; font-weight:700; color:var(--forest); flex:1;}
+  .badge{font-size:9.5px; font-weight:800; letter-spacing:.04em; padding:4px 9px; border-radius:99px; text-transform:uppercase; white-space:nowrap;}
+  .diag-item p{margin:0 0 11px 0; font-size:13.5px; color:var(--ink-dim); font-weight:500;}
+  .diag-item .action{
+    font-size:13px; font-weight:700; color:var(--forest);
+    padding-top:11px; border-top:1px solid rgba(37,57,42,0.09);
+    display:flex; gap:7px; align-items:flex-start;
+  }
+  .diag-item .action .arrow{color:var(--sage); flex:none;}
 
-  ul.notes{list-style:none; padding:0; margin:16px 0 0;}
-  ul.notes li{padding:9px 0 9px 20px; position:relative; border-top:1px solid rgba(239,231,216,0.08); font-size:14px;}
+  .status-ok .icon-badge{background:var(--sage-light); color:var(--forest-soft);}
+  .status-ok .badge{background:var(--sage-light); color:var(--forest-soft);}
+  .status-warn .icon-badge{background:var(--amber-light); color:#8A6A22;}
+  .status-warn .badge{background:var(--amber-light); color:#8A6A22;}
+  .status-bad .icon-badge{background:var(--rust-light); color:#8C4A31;}
+  .status-bad .badge{background:var(--rust-light); color:#8C4A31;}
+  .status-unk .icon-badge{background:#EEEDE6; color:var(--ink-dim);}
+  .status-unk .badge{background:#EEEDE6; color:var(--ink-dim);}
+
+  details{margin-top:20px;}
+  summary{
+    cursor:pointer; font-size:13px; color:var(--forest-soft); font-weight:700;
+    padding:6px 0; list-style:none; display:flex; align-items:center; gap:6px;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:"✦"; font-size:11px; color:var(--sage);}
+  ul.notes{list-style:none; padding:0; margin:10px 0 0;}
+  ul.notes li{
+    padding:10px 0 10px 4px; font-size:13.5px; color:var(--ink-dim); font-weight:500;
+    border-top:1px solid rgba(37,57,42,0.07);
+  }
   ul.notes li:first-child{border-top:none;}
-  ul.notes li::before{content:"•"; position:absolute; left:2px; color:var(--clay);}
 
-  .confidence{font-size:12px; color:var(--parchment-dim); margin-top:16px; font-family:'IBM Plex Mono',monospace;}
+  .disclaimer{
+    font-size:12px; color:var(--ink-dim); font-weight:500;
+    background:var(--rust-light); border:1px solid rgba(181,103,74,0.25);
+    border-radius:var(--r-md); padding:15px 17px;
+  }
+  .disclaimer b{color:#8C4A31;}
 
-  .disclaimer{font-size:12.5px; color:var(--parchment-dim); background:rgba(193,97,63,0.1); border:1px solid rgba(193,97,63,0.35); border-radius:8px; padding:12px 14px; margin-top:6px;}
-  .disclaimer b{color:var(--danger);}
+  .error-box{
+    background:var(--rust-light); border:1px solid rgba(181,103,74,0.3);
+    border-radius:var(--r-sm); padding:13px 16px; font-size:13.5px; color:#8C4A31; font-weight:600;
+    margin-top:14px;
+  }
 
-  details{margin-top:6px;}
-  summary{cursor:pointer; font-size:13.5px; color:var(--moss); font-weight:600; padding:4px 0;}
-  summary::-webkit-details-marker{color:var(--moss);}
-
-  .error-box{background:rgba(193,97,63,0.14); border:1px solid rgba(193,97,63,0.4); border-radius:10px; padding:14px 16px; font-size:14px; color:var(--parchment);}
-
-  footer{text-align:center; color:var(--parchment-dim); font-size:12px; margin-top:36px;}
+  footer{text-align:center; color:var(--ink-dim); font-size:11.5px; margin-top:44px; font-weight:600; opacity:.75;}
 </style>
 </head>
 <body>
+
+<div class="blob-tl"></div>
+<svg class="leaf-tr" viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg">
+  <path d="M170 10 C 220 60 210 140 150 190 C 110 220 60 230 20 245 C 70 200 90 160 95 120 C 100 75 120 35 170 10 Z" fill="#7C9473"/>
+  <path d="M150 40 C 185 80 178 135 135 172" stroke="#5C7548" stroke-width="2" fill="none" opacity="0.5"/>
+</svg>
+
 <div class="wrap">
 
-  <header class="top">
-    <div class="eyebrow">Diagnóstico por imagem</div>
-    <h1>Assistente de Plantas</h1>
-    <p>Fotografe sua planta e receba um diagnóstico: se ela precisa de mais água, mais sol, se o vaso está com pouca ou muita terra, e o que fazer a respeito.</p>
-  </header>
+  <div class="nav-row">
+    <div class="brand"><span class="mark">🌱</span>Frondly</div>
+    <div class="nav-pill">Diagnóstico por IA</div>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow-pill"><span class="dot"></span>ANÁLISE EM SEGUNDOS</div>
+    <h1>Sua planta está bem?</h1>
+    <p>Fotografe e receba um diagnóstico de água, luz e terra — com o que fazer a respeito, na hora.</p>
+  </div>
 
   <!-- Capture card -->
   <div class="card">
-    <h2>1. Fotografe a planta</h2>
-    <div class="sub">Enquadre a planta inteira, com boa luz natural. Se possível, inclua o vaso/base para avaliarmos a terra.</div>
+    <span class="step-tag">Passo 1</span>
+    <h2>Fotografe a planta</h2>
+    <div class="sub">Enquadre a planta inteira, com boa luz. Inclua o vaso se quiser avaliar a terra também.</div>
 
     <div class="cam-frame" id="camFrame">
       <div class="cam-empty" id="camEmpty">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h3l2-2h6l2 2h3v12H4V7z"/><circle cx="12" cy="13" r="3.5"/></svg>
-        <div>Nenhuma foto ainda</div>
+        <div class="icon-circle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#25392A" stroke-width="1.6"><path d="M4 7h3l2-2h6l2 2h3v12H4V7z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </div>
+        <div class="txt">Nenhuma foto ainda</div>
+        <div class="txt-sub">Ligue a câmera ou envie uma imagem</div>
       </div>
       <video id="video" autoplay playsinline style="display:none;"></video>
       <img id="capturedImg" style="display:none;">
@@ -132,15 +273,21 @@
     <canvas id="canvas"></canvas>
 
     <div class="controls">
-      <button class="btn-primary" id="startCam">Ligar câmera</button>
+      <button class="btn-primary" id="startCam">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h3l2-2h6l2 2h3v12H4V7z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        Ligar câmera
+      </button>
       <button class="btn-primary" id="shootBtn" style="display:none;">Tirar foto</button>
       <label class="filebtn btn-secondary" for="fileInput">Enviar foto</label>
       <input type="file" id="fileInput" accept="image/*" capture="environment">
       <button class="btn-secondary" id="resetBtn" style="display:none;">Trocar foto</button>
     </div>
-    <div class="hint">A foto é analisada e não é armazenada em nenhum servidor além da chamada do modelo de visão.</div>
+    <div class="hint">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      A foto é analisada na hora e não fica salva em nenhum servidor.
+    </div>
 
-    <button class="btn-primary diagnose-btn" id="diagnoseBtn" style="display:none;" disabled>Diagnosticar planta</button>
+    <button class="btn-primary diagnose-btn" id="diagnoseBtn" style="display:none;" disabled>✦ Diagnosticar planta</button>
     <div class="loading" id="loadingBox" style="display:none;">
       <div class="spinner"></div>
       <span id="loadingText">Analisando folhas, terra e sinais de luz…</span>
@@ -152,11 +299,13 @@
   <div id="resultsArea" style="display:none;">
 
     <div class="card">
-      <div class="health-banner" id="healthBanner">
+      <span class="step-tag">Resultado</span>
+      <div class="health-banner">
         <div>
-          <h2 id="healthTitle" style="font-size:18px; margin-bottom:2px;">—</h2>
+          <h2 id="healthTitle">—</h2>
           <div class="id" id="plantId"></div>
         </div>
+        <div class="conf-chip" id="confChip"></div>
       </div>
 
       <div class="diag-grid" id="diagGrid"></div>
@@ -165,16 +314,14 @@
         <summary>Outros sinais observados</summary>
         <ul class="notes" id="notesList"></ul>
       </details>
-
-      <div class="confidence" id="confidenceLine"></div>
     </div>
 
     <div class="disclaimer">
-      <b>Sobre este diagnóstico:</b> é uma leitura visual automatizada a partir de uma única foto — fatores como espécie exata, histórico de rega, clima local e pragas nem sempre são visíveis na imagem. Use como um primeiro direcionamento, não como diagnóstico definitivo. Em caso de dúvida persistente, consulte um viveiro local ou agrônomo.
+      <b>Sobre este diagnóstico:</b> é uma leitura visual automatizada a partir de uma única foto — histórico de rega, clima local e pragas nem sempre aparecem na imagem. Use como primeiro direcionamento; em caso de dúvida persistente, consulte um viveiro local ou agrônomo.
     </div>
   </div>
 
-  <footer>Diagnóstico gerado por modelo de visão · nenhuma foto é salva</footer>
+  <footer>Diagnóstico gerado por modelo de visão · nenhuma foto é armazenada</footer>
 </div>
 
 <script>
@@ -193,7 +340,7 @@ const errorBox = document.getElementById('errorBox');
 const resultsArea = document.getElementById('resultsArea');
 
 let stream = null;
-let currentImageBase64 = null; // without data: prefix
+let currentImageBase64 = null;
 let currentMediaType = 'image/jpeg';
 
 const LOADING_MESSAGES = [
@@ -211,7 +358,7 @@ startCam.addEventListener('click', async () => {
     video.style.display = 'block';
     camEmpty.style.display = 'none';
     startCam.style.display = 'none';
-    shootBtn.style.display = 'inline-block';
+    shootBtn.style.display = 'inline-flex';
   } catch (err) {
     alert('Não foi possível acessar a câmera. Use "Enviar foto" para escolher uma imagem da galeria.');
   }
@@ -254,7 +401,7 @@ resetBtn.addEventListener('click', () => {
   camEmpty.style.display = 'flex';
   resultsArea.style.display = 'none';
   resetBtn.style.display = 'none';
-  startCam.style.display = 'inline-block';
+  startCam.style.display = 'inline-flex';
   shootBtn.style.display = 'none';
   diagnoseBtn.style.display = 'none';
   errorBox.innerHTML = '';
@@ -272,9 +419,9 @@ function setImageFromCanvas(){
   capturedImg.src = dataUrl;
   capturedImg.style.display = 'block';
   camEmpty.style.display = 'none';
-  resetBtn.style.display = 'inline-block';
+  resetBtn.style.display = 'inline-flex';
   startCam.style.display = 'none';
-  diagnoseBtn.style.display = 'block';
+  diagnoseBtn.style.display = 'flex';
   diagnoseBtn.disabled = false;
   resultsArea.style.display = 'none';
   errorBox.innerHTML = '';
@@ -367,13 +514,10 @@ Baseie-se em sinais visuais reais: cor e textura das folhas (amareladas, murchas
 }
 
 const STATUS_META = {
-  // água
   'adequada': {cls:'status-ok', label:'OK'},
   'baixa': {cls:'status-warn', label:'ATENÇÃO'},
   'excesso': {cls:'status-bad', label:'EXCESSO'},
-  // luz uses same baixa/adequada/excesso as above (pouca instead of baixa)
   'pouca': {cls:'status-warn', label:'ATENÇÃO'},
-  // solo
   'terra_adequada': {cls:'status-ok', label:'OK'},
   'pouca_terra': {cls:'status-warn', label:'ATENÇÃO'},
   'terra_em_excesso': {cls:'status-warn', label:'ATENÇÃO'},
@@ -392,11 +536,12 @@ function diagItem(name, icon, block){
   div.className = 'diag-item ' + meta.cls;
   div.innerHTML = `
     <div class="head">
-      <span class="name">${icon} ${name}</span>
+      <span class="icon-badge">${icon}</span>
+      <span class="name">${name}</span>
       <span class="badge">${meta.label}</span>
     </div>
     <p>${escapeHtml(block.diagnostico || '')}</p>
-    ${block.acao ? `<div class="action">${escapeHtml(block.acao)}</div>` : ''}
+    ${block.acao ? `<div class="action"><span class="arrow">→</span>${escapeHtml(block.acao)}</div>` : ''}
   `;
   return div;
 }
@@ -405,7 +550,13 @@ function renderDiagnosis(d){
   resultsArea.style.display = 'block';
 
   document.getElementById('healthTitle').textContent = d.saude_geral || 'Diagnóstico concluído';
-  document.getElementById('plantId').textContent = d.planta_identificada ? `Planta identificada: ${d.planta_identificada}` : 'Espécie não identificada com certeza';
+  document.getElementById('plantId').textContent = d.planta_identificada ? `🔎 ${d.planta_identificada}` : 'Espécie não identificada com certeza';
+
+  const confMap = {alta:{cls:'conf-alta', label:'Confiança alta'}, media:{cls:'conf-media', label:'Confiança média'}, baixa:{cls:'conf-baixa', label:'Confiança baixa'}};
+  const conf = confMap[d.confianca] || {cls:'conf-media', label:'Confiança não informada'};
+  const chip = document.getElementById('confChip');
+  chip.className = 'conf-chip ' + conf.cls;
+  chip.textContent = conf.label;
 
   const grid = document.getElementById('diagGrid');
   grid.innerHTML = '';
@@ -426,10 +577,6 @@ function renderDiagnosis(d){
   } else {
     notesDetails.style.display = 'none';
   }
-
-  const confMap = {alta:'alta', media:'média', baixa:'baixa'};
-  document.getElementById('confidenceLine').textContent =
-    'Confiança do diagnóstico: ' + (confMap[d.confianca] || d.confianca || 'não informada');
 
   resultsArea.scrollIntoView({behavior:'smooth', block:'start'});
 }
