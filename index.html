@@ -296,6 +296,16 @@
     .btn-secondary:hover {
       background: var(--sage-light);
     }
+    .btn-cancel {
+      background: transparent;
+      color: var(--rust);
+      border: 1px solid var(--rust-light);
+      padding: 8px 16px;
+      font-size: 12.5px;
+    }
+    .btn-cancel:hover {
+      background: var(--rust-light);
+    }
     input[type="file"] {
       display: none;
     }
@@ -328,11 +338,18 @@
     .loading {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
       padding: 18px 2px 4px;
       color: var(--ink-dim);
       font-size: 13.5px;
       font-weight: 600;
+      flex-wrap: wrap;
+    }
+    .loading .left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
     .spinner {
       width: 20px;
@@ -401,6 +418,17 @@
     .conf-baixa {
       background: var(--rust-light);
       color: #8C4A31;
+    }
+
+    /* imagem analisada no resultado */
+    .result-photo {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: var(--r-md);
+      margin-bottom: 18px;
+      border: 1px solid rgba(37, 57, 42, 0.08);
+      display: block;
     }
 
     /* diag items */
@@ -769,13 +797,16 @@
       </div>
       <div class="hint">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        A foto é analisada na hora e não fica salva em nenhum servidor.
+        A foto não é armazenada em nossos servidores — ela é enviada apenas no momento da análise para gerar o diagnóstico.
       </div>
 
       <button class="btn-primary diagnose-btn" id="diagnoseBtn" style="display:none;" disabled>✦ Diagnosticar planta</button>
       <div class="loading" id="loadingBox" style="display:none;">
-        <div class="spinner"></div>
-        <span id="loadingText">Analisando folhas, terra e sinais de luz…</span>
+        <div class="left">
+          <div class="spinner"></div>
+          <span id="loadingText">Analisando folhas, terra e sinais de luz…</span>
+        </div>
+        <button class="btn-cancel" id="cancelBtn" type="button">Cancelar</button>
       </div>
       <div id="errorBox"></div>
     </div>
@@ -784,6 +815,7 @@
     <div id="resultsArea" style="display:none;">
       <div class="card">
         <span class="step-tag">Resultado</span>
+        <img class="result-photo" id="resultPhoto" style="display:none;" alt="Foto analisada" />
         <div class="health-banner">
           <div>
             <h2 id="healthTitle">—</h2>
@@ -846,8 +878,10 @@
     const diagnoseBtn = document.getElementById('diagnoseBtn');
     const loadingBox = document.getElementById('loadingBox');
     const loadingText = document.getElementById('loadingText');
+    const cancelBtn = document.getElementById('cancelBtn');
     const errorBox = document.getElementById('errorBox');
     const resultsArea = document.getElementById('resultsArea');
+    const resultPhoto = document.getElementById('resultPhoto');
 
     const historicoContainer = document.getElementById('historicoContainer');
     const historicoLista = document.getElementById('historicoLista');
@@ -860,6 +894,7 @@
     let currentImageBase64 = null;
     let currentMediaType = 'image/jpeg';
     let historico = [];
+    let currentAbortController = null;
     const STORAGE_KEY = 'frondly_historico';
 
     // ============================================================
@@ -911,9 +946,14 @@
       historicoBadge.textContent = total;
     }
 
-    function adicionarAoHistorico(diagnosis, imagemBase64) {
-      // gerar thumbnail (100x100)
-      const thumb = gerarThumbnail(imagemBase64);
+    // agora assíncrono: espera o thumbnail ser gerado de verdade antes de salvar
+    async function adicionarAoHistorico(diagnosis, imagemBase64) {
+      let thumb = null;
+      try {
+        thumb = await gerarThumbnail(imagemBase64);
+      } catch (_) {
+        thumb = null; // se falhar, segue sem thumbnail em vez de quebrar o fluxo
+      }
       const entrada = {
         timestamp: Date.now(),
         imagem: thumb,
@@ -930,16 +970,30 @@
       renderizarHistorico();
     }
 
+    // FIX: antes o drawImage rodava antes da imagem carregar (thumb saía em branco).
+    // Agora retorna uma Promise que só resolve depois do onload da imagem.
     function gerarThumbnail(base64) {
-      // cria um canvas 100x100 e desenha a imagem redimensionada
-      const img = new Image();
-      img.src = 'data:image/jpeg;base64,' + base64;
-      const c = document.createElement('canvas');
-      c.width = 100;
-      c.height = 100;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0, 100, 100);
-      return c.toDataURL('image/jpeg', 0.7);
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const c = document.createElement('canvas');
+            c.width = 100;
+            c.height = 100;
+            const ctx = c.getContext('2d');
+            // recorte central quadrado, para não distorcer a miniatura
+            const side = Math.min(img.width, img.height);
+            const sx = (img.width - side) / 2;
+            const sy = (img.height - side) / 2;
+            ctx.drawImage(img, sx, sy, side, side, 0, 0, 100, 100);
+            resolve(c.toDataURL('image/jpeg', 0.7));
+          } catch (e) {
+            reject(e);
+          }
+        };
+        img.onerror = () => reject(new Error('Falha ao carregar imagem para thumbnail'));
+        img.src = 'data:image/jpeg;base64,' + base64;
+      });
     }
 
     function renderizarHistorico() {
@@ -971,10 +1025,13 @@
         const iconLuz = { 'adequada': '☀️✓', 'pouca': '☀️↓', 'excesso': '☀️↑', 'indeterminado': '☀️?' } [statusLuz] || '☀️?';
         const iconSolo = { 'terra_adequada': '🪴✓', 'pouca_terra': '🪴↓', 'terra_em_excesso': '🪴↑', 'vaso_pequeno': '🪴↗',
           'indeterminado': '🪴?' } [statusSolo] || '🪴?';
+        const thumbSrc = item.imagem || '';
 
         html += `
           <div class="historico-item" data-index="${idx}">
-            <img class="thumb" src="${item.imagem}" alt="thumbnail" loading="lazy">
+            ${thumbSrc
+              ? `<img class="thumb" src="${thumbSrc}" alt="thumbnail" loading="lazy">`
+              : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🌿</div>`}
             <div class="info">
               <div class="data">${dataStr}</div>
               <div class="resumo">${escapeHtml(item.saude_geral)}</div>
@@ -1006,7 +1063,7 @@
               confianca: item.confianca,
               outros_sintomas: item.outros
             };
-            renderDiagnosis(diag);
+            renderDiagnosis(diag, item.imagem || null);
             // rolar até os resultados
             resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
@@ -1028,10 +1085,6 @@
         historico = [];
         salvarHistorico();
         renderizarHistorico();
-        if (historicoContainer.style.display !== 'none') {
-          // se estiver visível, atualiza
-        }
-        // opcional: esconder container se vazio
       }
     }
 
@@ -1047,7 +1100,15 @@
         startCam.style.display = 'none';
         shootBtn.style.display = 'inline-flex';
       } catch (err) {
-        alert('Não foi possível acessar a câmera. Use "Enviar foto" para escolher uma imagem da galeria.');
+        let msg = 'Não foi possível acessar a câmera. Use "Enviar foto" para escolher uma imagem da galeria.';
+        if (err && err.name === 'NotAllowedError') {
+          msg = 'Permissão de câmera negada. Habilite o acesso à câmera nas configurações do navegador ou use "Enviar foto".';
+        } else if (err && (err.name === 'NotFoundError' || err.name === 'OverconstrainedError')) {
+          msg = 'Nenhuma câmera foi encontrada neste dispositivo. Use "Enviar foto" para escolher uma imagem da galeria.';
+        } else if (err && err.name === 'NotReadableError') {
+          msg = 'A câmera está sendo usada por outro aplicativo. Feche-o e tente novamente, ou use "Enviar foto".';
+        }
+        alert(msg);
       }
     });
 
@@ -1083,6 +1144,9 @@
           ctx.drawImage(img, 0, 0, w, h);
           setImageFromCanvas();
         };
+        img.onerror = () => {
+          errorBox.innerHTML = `<div class="error-box">Não consegui ler essa imagem. Tente outro arquivo.</div>`;
+        };
         img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
@@ -1101,11 +1165,24 @@
     });
 
     function stopCamera() {
-      if (stream) { stream.getTracks().forEach(t => t.stop());
-        stream = null; }
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
       video.style.display = 'none';
       shootBtn.style.display = 'none';
     }
+
+    // FIX: garante que a câmera seja liberada se o usuário sair/recarregar a página
+    window.addEventListener('beforeunload', () => {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+      }
+    });
+    document.addEventListener('visibilitychange', () => {
+      // opcional: não paramos a câmera ao trocar de aba, só ao sair da página,
+      // para não atrapalhar quem só minimizou o navegador.
+    });
 
     function setImageFromCanvas() {
       const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
@@ -1140,27 +1217,40 @@
         loadingText.textContent = LOADING_MESSAGES[msgIdx];
       }, 1800);
 
+      currentAbortController = new AbortController();
+
       try {
-        const diagnosis = await requestDiagnosis(currentImageBase64, currentMediaType);
-        renderDiagnosis(diagnosis);
-        // ADD AO HISTÓRICO (usando a imagem original)
-        adicionarAoHistorico(diagnosis, currentImageBase64);
-        // se o histórico estiver visível, atualiza
+        const imagemUsada = currentImageBase64;
+        const diagnosis = await requestDiagnosis(imagemUsada, currentMediaType, currentAbortController.signal);
+        renderDiagnosis(diagnosis, 'data:image/jpeg;base64,' + imagemUsada);
+        // ADD AO HISTÓRICO (usando a imagem original) — agora aguarda o thumbnail
+        await adicionarAoHistorico(diagnosis, imagemUsada);
         if (historicoContainer.style.display !== 'none') {
           renderizarHistorico();
         }
       } catch (err) {
-        console.error(err);
-        errorBox.innerHTML =
-          `<div class="error-box">Não consegui concluir o diagnóstico agora (${escapeHtml(err.message || 'erro desconhecido')}). Verifique a conexão e tente novamente.</div>`;
+        if (err && err.name === 'AbortError') {
+          errorBox.innerHTML = `<div class="error-box">Diagnóstico cancelado.</div>`;
+        } else {
+          console.error(err);
+          errorBox.innerHTML =
+            `<div class="error-box">Não consegui concluir o diagnóstico agora (${escapeHtml(err.message || 'erro desconhecido')}). Verifique a conexão e tente novamente.</div>`;
+        }
       } finally {
         clearInterval(loadingInterval);
         loadingBox.style.display = 'none';
         diagnoseBtn.disabled = false;
+        currentAbortController = null;
       }
     });
 
-    async function requestDiagnosis(base64, mediaType) {
+    cancelBtn.addEventListener('click', () => {
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+    });
+
+    async function requestDiagnosis(base64, mediaType, signal) {
       const systemPrompt = `Você é um assistente especializado em cuidado de plantas domésticas e de jardim. Você recebe uma foto de uma planta (às vezes incluindo vaso/terra) e deve dar um diagnóstico visual prático.
 
       Responda SOMENTE com um objeto JSON válido, sem markdown, sem crases, sem texto antes ou depois. Use exatamente este formato:
@@ -1181,10 +1271,14 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // IMPORTANTE: você precisa incluir sua chave de API aqui, ex:
+          // IMPORTANTE: NUNCA coloque sua chave de API diretamente aqui em produção —
+          // qualquer pessoa pode vê-la pelo DevTools do navegador.
+          // Em produção, faça essa chamada a partir de um backend/serverless que
+          // guarda a chave em segredo e repassa a requisição.
           // "x-api-key": "SUA_CHAVE_AQUI",
           // "anthropic-version": "2023-06-01"
         },
+        signal,
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
           max_tokens: 1000,
@@ -1255,8 +1349,16 @@
       return div;
     }
 
-    function renderDiagnosis(d) {
+    // agora aceita opcionalmente a imagem (dataURL) para mostrar no topo do resultado
+    function renderDiagnosis(d, imagemDataUrl) {
       resultsArea.style.display = 'block';
+
+      if (imagemDataUrl) {
+        resultPhoto.src = imagemDataUrl;
+        resultPhoto.style.display = 'block';
+      } else {
+        resultPhoto.style.display = 'none';
+      }
 
       document.getElementById('healthTitle').textContent = d.saude_geral || 'Diagnóstico concluído';
       document.getElementById('plantId').textContent = d.planta_identificada ? `🔎 ${d.planta_identificada}` :
@@ -1310,9 +1412,6 @@
     // Eventos do histórico
     toggleHistoricoBtn.addEventListener('click', toggleHistorico);
     limparHistoricoBtn.addEventListener('click', limparHistorico);
-
-    // Abrir histórico automaticamente se houver itens (opcional)
-    // Podemos deixar fechado por padrão.
   </script>
 </body>
 </html>
