@@ -3,12 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frondly — diagnóstico de plantas por foto</title>
+  <title>Frondly — diagnóstico de plantas por foto (Pl@ntNet)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  
-  <!-- Carrega as configurações locais com a chave API -->
-  <script src="config.js"></script>
 
   <style>
     /* ===== BASE ===== */
@@ -30,14 +27,8 @@
       --r-md: 18px;
       --r-sm: 12px;
     }
-    * {
-      box-sizing: border-box;
-    }
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
     body {
       background: var(--cream);
       color: var(--forest);
@@ -47,8 +38,7 @@
       position: relative;
       overflow-x: hidden;
     }
-    h1,
-    h2 {
+    h1, h2 {
       font-family: 'Fraunces', serif;
       font-weight: 600;
       margin: 0;
@@ -56,7 +46,7 @@
       color: var(--forest);
     }
 
-    /* ===== DECORATIVE BLOBS ===== */
+    /* ===== BLOBS DECORATIVOS ===== */
     .blob-tl {
       position: fixed;
       top: -90px;
@@ -69,16 +59,6 @@
       z-index: 0;
       pointer-events: none;
     }
-    .leaf-tr {
-      position: fixed;
-      top: -40px;
-      right: -60px;
-      width: 220px;
-      height: 260px;
-      z-index: 0;
-      pointer-events: none;
-      opacity: .5;
-    }
     .wrap {
       max-width: 760px;
       margin: 0 auto;
@@ -87,7 +67,7 @@
       z-index: 1;
     }
 
-    /* ===== HEADER / NAV ===== */
+    /* ===== HEADER ===== */
     .nav-row {
       display: flex;
       align-items: center;
@@ -108,7 +88,7 @@
     .brand .mark {
       width: 32px;
       height: 32px;
-      border-radius: 9px;
+      border-radius: 99px;
       background: var(--forest);
       display: flex;
       align-items: center;
@@ -122,26 +102,13 @@
       background: var(--forest);
       padding: 9px 18px;
       border-radius: 99px;
-      letter-spacing: .01em;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .nav-pill .badge-count {
-      background: var(--amber);
-      color: var(--forest);
-      border-radius: 99px;
-      padding: 0 8px;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 18px;
-    }
 
     /* ===== HERO ===== */
-    .hero {
-      text-align: left;
-      margin-bottom: 30px;
-    }
+    .hero { margin-bottom: 30px; }
     .eyebrow-pill {
       display: inline-flex;
       align-items: center;
@@ -163,18 +130,8 @@
       border-radius: 50%;
       background: var(--sage);
     }
-    .hero h1 {
-      font-size: 34px;
-      line-height: 1.18;
-      max-width: 16ch;
-    }
-    .hero p {
-      color: var(--ink-dim);
-      font-size: 15px;
-      margin: 12px 0 0;
-      max-width: 46ch;
-      font-weight: 500;
-    }
+    .hero h1 { font-size: 34px; line-height: 1.18; max-width: 16ch; }
+    .hero p { color: var(--ink-dim); font-size: 15px; margin: 12px 0 0; font-weight: 500; }
 
     /* ===== CARDS ===== */
     .card {
@@ -185,16 +142,8 @@
       box-shadow: 0 10px 34px -14px rgba(37, 57, 42, 0.14);
       border: 1px solid rgba(37, 57, 42, 0.06);
     }
-    .card h2 {
-      font-size: 19px;
-      margin-bottom: 5px;
-    }
-    .card .sub {
-      color: var(--ink-dim);
-      font-size: 13.5px;
-      margin-bottom: 18px;
-      font-weight: 500;
-    }
+    .card h2 { font-size: 19px; margin-bottom: 5px; }
+    .card .sub { color: var(--ink-dim); font-size: 13.5px; margin-bottom: 18px; font-weight: 500; }
     .step-tag {
       font-size: 11px;
       font-weight: 700;
@@ -215,8 +164,7 @@
       overflow: hidden;
       border: 1.5px dashed var(--sage-light);
     }
-    video,
-    .cam-frame img {
+    video, .cam-frame img {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -233,36 +181,10 @@
       text-align: center;
       padding: 20px;
     }
-    .cam-empty .icon-circle {
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: var(--white);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 18px -8px rgba(37, 57, 42, 0.25);
-    }
-    .cam-empty .txt {
-      font-size: 14px;
-      font-weight: 700;
-    }
-    .cam-empty .txt-sub {
-      font-size: 12.5px;
-      opacity: .75;
-      margin-top: -4px;
-      font-weight: 500;
-    }
 
     /* ===== BUTTONS ===== */
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-top: 18px;
-      flex-wrap: wrap;
-    }
-    button,
-    .filebtn {
+    .controls { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    button, .filebtn {
       font-family: 'Work Sans', sans-serif;
       font-weight: 700;
       font-size: 13.5px;
@@ -270,517 +192,87 @@
       border-radius: 99px;
       border: none;
       cursor: pointer;
-      transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      transition: transform .15s ease;
     }
-    button:active,
-    .filebtn:active {
-      transform: scale(0.96);
-    }
-    .btn-primary {
-      background: var(--forest);
-      color: var(--white);
-      box-shadow: 0 8px 22px -8px rgba(37, 57, 42, 0.45);
-    }
-    .btn-primary:hover {
-      background: var(--forest-soft);
-    }
-    .btn-primary:disabled {
-      opacity: .35;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    .btn-secondary {
-      background: var(--sage-lighter);
-      color: var(--forest);
-      border: 1px solid var(--sage-light);
-    }
-    .btn-secondary:hover {
-      background: var(--sage-light);
-    }
-    .btn-cancel {
-      background: transparent;
-      color: var(--rust);
-      border: 1px solid var(--rust-light);
-      padding: 8px 16px;
-      font-size: 12.5px;
-    }
-    .btn-cancel:hover {
-      background: var(--rust-light);
-    }
-    input[type="file"] {
-      display: none;
-    }
-    .hint {
-      font-size: 12px;
-      color: var(--ink-dim);
-      margin-top: 14px;
-      font-weight: 500;
-      display: flex;
-      gap: 6px;
-      align-items: flex-start;
-    }
-    .hint svg {
-      flex: none;
-      margin-top: 1px;
-      opacity: .6;
-    }
-    canvas {
-      display: none;
-    }
-    .diagnose-btn {
-      width: 100%;
-      justify-content: center;
-      padding: 15px;
-      font-size: 14.5px;
-      margin-top: 20px;
-    }
+    button:active, .filebtn:active { transform: scale(0.96); }
+    .btn-primary { background: var(--forest); color: var(--white); }
+    .btn-primary:hover { background: var(--forest-soft); }
+    .btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+    .btn-secondary { background: var(--sage-lighter); color: var(--forest); border: 1px solid var(--sage-light); }
+    input[type="file"] { display: none; }
+    canvas { display: none; }
+    .diagnose-btn { width: 100%; justify-content: center; padding: 15px; margin-top: 20px; }
 
     /* ===== LOADING ===== */
     .loading {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 12px;
       padding: 18px 2px 4px;
       color: var(--ink-dim);
       font-size: 13.5px;
       font-weight: 600;
-      flex-wrap: wrap;
-    }
-    .loading .left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
     }
     .spinner {
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      flex: none;
       border: 2.5px solid var(--sage-light);
       border-top-color: var(--sage);
       animation: spin .8s linear infinite;
     }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    @keyframes fadein {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ===== RESULTS ===== */
-    #resultsArea {
-      animation: fadein .5s ease both;
-    }
-    .health-banner {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 22px;
-      flex-wrap: wrap;
-    }
-    .health-banner h2 {
-      font-size: 21px;
-      line-height: 1.32;
-    }
-    .health-banner .id {
-      font-size: 12.5px;
-      color: var(--ink-dim);
-      margin-top: 6px;
-      font-weight: 600;
-    }
-    .conf-chip {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .03em;
-      padding: 6px 13px;
-      border-radius: 99px;
-      white-space: nowrap;
-      flex: none;
-    }
-    .conf-alta {
-      background: var(--sage-light);
-      color: var(--forest-soft);
-    }
-    .conf-media {
-      background: var(--amber-light);
-      color: #8A6A22;
-    }
-    .conf-baixa {
-      background: var(--rust-light);
-      color: #8C4A31;
-    }
+    .health-banner { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+    .health-banner h2 { font-size: 21px; }
+    .health-banner .id { font-size: 13px; color: var(--ink-dim); margin-top: 4px; font-weight: 600; }
+    .conf-chip { font-size: 11px; font-weight: 700; padding: 6px 13px; border-radius: 99px; }
+    .conf-alta { background: var(--sage-light); color: var(--forest-soft); }
+    .conf-media { background: var(--amber-light); color: #8A6A22; }
+    .conf-baixa { background: var(--rust-light); color: #8C4A31; }
 
-    .result-photo {
-      width: 100%;
-      max-height: 260px;
-      object-fit: cover;
-      border-radius: var(--r-md);
-      margin-bottom: 18px;
-      border: 1px solid rgba(37, 57, 42, 0.08);
-      display: block;
-    }
+    .result-photo { width: 100%; max-height: 260px; object-fit: cover; border-radius: var(--r-md); margin-bottom: 18px; }
+    .diag-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
+    .diag-item { border-radius: var(--r-md); padding: 18px; border: 1px solid rgba(37, 57, 42, 0.07); background: var(--cream); }
+    .diag-item .head { display: flex; align-items: center; gap: 11px; margin-bottom: 11px; }
+    .diag-item .icon-badge { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; background: var(--sage-light); }
+    .diag-item .name { font-size: 13.5px; font-weight: 700; flex: 1; }
+    .diag-item p { margin: 0 0 11px 0; font-size: 13.5px; color: var(--ink-dim); }
 
-    .diag-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 16px;
-    }
-    .diag-item {
-      border-radius: var(--r-md);
-      padding: 18px;
-      border: 1px solid rgba(37, 57, 42, 0.07);
-      background: var(--cream);
-    }
-    .diag-item .head {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      margin-bottom: 11px;
-    }
-    .diag-item .icon-badge {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      flex: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-    }
-    .diag-item .name {
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--forest);
-      flex: 1;
-    }
-    .badge {
-      font-size: 9.5px;
-      font-weight: 800;
-      letter-spacing: .04em;
-      padding: 4px 9px;
-      border-radius: 99px;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-    .diag-item p {
-      margin: 0 0 11px 0;
-      font-size: 13.5px;
-      color: var(--ink-dim);
-      font-weight: 500;
-    }
-    .diag-item .action {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--forest);
-      padding-top: 11px;
-      border-top: 1px solid rgba(37, 57, 42, 0.09);
-      display: flex;
-      gap: 7px;
-      align-items: flex-start;
-    }
-    .diag-item .action .arrow {
-      color: var(--sage);
-      flex: none;
-    }
-
-    .status-ok .icon-badge {
-      background: var(--sage-light);
-      color: var(--forest-soft);
-    }
-    .status-ok .badge {
-      background: var(--sage-light);
-      color: var(--forest-soft);
-    }
-    .status-warn .icon-badge {
-      background: var(--amber-light);
-      color: #8A6A22;
-    }
-    .status-warn .badge {
-      background: var(--amber-light);
-      color: #8A6A22;
-    }
-    .status-bad .icon-badge {
-      background: var(--rust-light);
-      color: #8C4A31;
-    }
-    .status-bad .badge {
-      background: var(--rust-light);
-      color: #8C4A31;
-    }
-    .status-unk .icon-badge {
-      background: #EEEDE6;
-      color: var(--ink-dim);
-    }
-    .status-unk .badge {
-      background: #EEEDE6;
-      color: var(--ink-dim);
-    }
-
-    details {
-      margin-top: 20px;
-    }
-    summary {
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--forest-soft);
-      font-weight: 700;
-      padding: 6px 0;
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    summary::-webkit-details-marker {
-      display: none;
-    }
-    summary::before {
-      content: "✦";
-      font-size: 11px;
-      color: var(--sage);
-    }
-    ul.notes {
-      list-style: none;
-      padding: 0;
-      margin: 10px 0 0;
-    }
-    ul.notes li {
-      padding: 10px 0 10px 4px;
-      font-size: 13.5px;
-      color: var(--ink-dim);
-      font-weight: 500;
-      border-top: 1px solid rgba(37, 57, 42, 0.07);
-    }
-    ul.notes li:first-child {
-      border-top: none;
-    }
-
-    .disclaimer {
-      font-size: 12px;
-      color: var(--ink-dim);
-      font-weight: 500;
-      background: var(--rust-light);
-      border: 1px solid rgba(181, 103, 74, 0.25);
-      border-radius: var(--r-md);
-      padding: 15px 17px;
-    }
-    .disclaimer b {
-      color: #8C4A31;
-    }
-    .error-box {
-      background: var(--rust-light);
-      border: 1px solid rgba(181, 103, 74, 0.3);
-      border-radius: var(--r-sm);
-      padding: 13px 16px;
-      font-size: 13.5px;
-      color: #8C4A31;
-      font-weight: 600;
-      margin-top: 14px;
-    }
-
-    /* ===== HISTÓRICO ===== */
-    .historico-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 8px 0 16px;
-    }
-    .historico-header h2 {
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .historico-header .badge-count {
-      background: var(--sage-light);
-      color: var(--forest-soft);
-      font-size: 13px;
-      font-weight: 700;
-      padding: 0 12px;
-      border-radius: 99px;
-      line-height: 26px;
-    }
-    .historico-lista {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 420px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-    .historico-lista::-webkit-scrollbar {
-      width: 5px;
-    }
-    .historico-lista::-webkit-scrollbar-track {
-      background: var(--cream-2);
-      border-radius: 9px;
-    }
-    .historico-lista::-webkit-scrollbar-thumb {
-      background: var(--sage-light);
-      border-radius: 9px;
-    }
-
-    .historico-item {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      background: var(--white);
-      border-radius: var(--r-md);
-      padding: 12px 16px;
-      border: 1px solid rgba(37, 57, 42, 0.06);
-      box-shadow: 0 3px 10px -6px rgba(37, 57, 42, 0.1);
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-    }
-    .historico-item:hover {
-      background: var(--cream-2);
-      transform: scale(1.01);
-    }
-    .historico-item .thumb {
-      width: 52px;
-      height: 52px;
-      border-radius: 10px;
-      object-fit: cover;
-      flex: none;
-      background: var(--sage-lighter);
-      border: 1px solid var(--sage-light);
-    }
-    .historico-item .info {
-      flex: 1;
-      min-width: 0;
-    }
-    .historico-item .info .data {
-      font-size: 11.5px;
-      color: var(--ink-dim);
-      font-weight: 600;
-      letter-spacing: .01em;
-    }
-    .historico-item .info .resumo {
-      font-weight: 700;
-      font-size: 14px;
-      margin: 2px 0 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .historico-item .info .tags {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      font-size: 10.5px;
-      font-weight: 600;
-      color: var(--ink-dim);
-    }
-    .historico-item .info .tags span {
-      background: var(--cream-2);
-      padding: 1px 8px;
-      border-radius: 99px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .historico-vazio {
-      text-align: center;
-      padding: 30px 10px;
-      color: var(--ink-dim);
-      font-weight: 500;
-    }
-    .historico-vazio .emoji {
-      font-size: 32px;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    /* ===== FOOTER ===== */
-    footer {
-      text-align: center;
-      color: var(--ink-dim);
-      font-size: 11.5px;
-      margin-top: 44px;
-      font-weight: 600;
-      opacity: .75;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 600px) {
-      .wrap {
-        padding: 20px 14px 70px;
-      }
-      .hero h1 {
-        font-size: 28px;
-      }
-      .nav-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-      }
-      .nav-pill {
-        justify-content: center;
-      }
-      .historico-item {
-        flex-wrap: wrap;
-      }
-      .historico-item .thumb {
-        width: 44px;
-        height: 44px;
-      }
-    }
+    .error-box { background: var(--rust-light); border: 1px solid rgba(181, 103, 74, 0.3); border-radius: var(--r-sm); padding: 13px 16px; color: #8C4A31; font-weight: 600; margin-top: 14px; }
   </style>
 </head>
 <body>
 
   <div class="blob-tl"></div>
-  <svg class="leaf-tr" viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg">
-    <path d="M170 10 C 220 60 210 140 150 190 C 110 220 60 230 20 245 C 70 200 90 160 95 120 C 100 75 120 35 170 10 Z" fill="#7C9473" />
-    <path d="M150 40 C 185 80 178 135 135 172" stroke="#5C7548" stroke-width="2" fill="none" opacity="0.5" />
-  </svg>
-
   <div class="wrap">
-
     <!-- NAV -->
     <div class="nav-row">
       <div class="brand"><span class="mark">🌱</span>Frondly</div>
-      <div class="nav-pill">
-        Diagnóstico por IA
-        <span class="badge-count" id="historicoBadge">0</span>
-      </div>
+      <div class="nav-pill">Powered by Pl@ntNet API</div>
     </div>
 
     <!-- HERO -->
     <div class="hero">
-      <div class="eyebrow-pill"><span class="dot"></span>ANÁLISE EM SEGUNDOS</div>
-      <h1>Sua planta está bem?</h1>
-      <p>Fotografe e receba um diagnóstico de água, luz e terra — com o que fazer a respeito, na hora.</p>
+      <div class="eyebrow-pill"><span class="dot"></span>IDENTIFICAÇÃO BOTÂNICA</div>
+      <h1>Qual é a sua planta?</h1>
+      <p>Fotografe as folhas ou flores para identificar a espécie com precisão científica usando a Pl@ntNet.</p>
     </div>
 
     <!-- CAPTURE CARD -->
     <div class="card">
       <span class="step-tag">Passo 1</span>
-      <h2>Fotografe a planta</h2>
-      <div class="sub">Enquadre a planta inteira, com boa luz. Inclua o vaso se quiser avaliar a terra também.</div>
+      <h2>Envie a foto</h2>
+      <div class="sub">Tire uma foto nítida da folha, flor ou fruto da planta.</div>
 
-      <div class="cam-frame" id="camFrame">
+      <div class="cam-frame">
         <div class="cam-empty" id="camEmpty">
-          <div class="icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#25392A" stroke-width="1.6"><path d="M4 7h3l2-2h6l2 2h3v12H4V7z"/><circle cx="12" cy="13" r="3.5"/></svg>
-          </div>
-          <div class="txt">Nenhuma foto ainda</div>
-          <div class="txt-sub">Ligue a câmera ou envie uma imagem</div>
+          <div style="font-size:32px;">📷</div>
+          <div style="font-weight:700;">Nenhuma foto ainda</div>
         </div>
         <video id="video" autoplay playsinline style="display:none;"></video>
         <img id="capturedImg" style="display:none;" />
@@ -788,27 +280,17 @@
       <canvas id="canvas"></canvas>
 
       <div class="controls">
-        <button class="btn-primary" id="startCam">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h3l2-2h6l2 2h3v12H4V7z"/><circle cx="12" cy="13" r="3.5"/></svg>
-          Ligar câmera
-        </button>
+        <button class="btn-primary" id="startCam">Ligar câmera</button>
         <button class="btn-primary" id="shootBtn" style="display:none;">Tirar foto</button>
-        <label class="filebtn btn-secondary" for="fileInput">Enviar foto</label>
-        <input type="file" id="fileInput" accept="image/*" capture="environment" />
+        <label class="filebtn btn-secondary" for="fileInput">Enviar arquivo</label>
+        <input type="file" id="fileInput" accept="image/*" />
         <button class="btn-secondary" id="resetBtn" style="display:none;">Trocar foto</button>
       </div>
-      <div class="hint">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        A foto não é armazenada em nossos servidores — ela é enviada apenas no momento da análise para gerar o diagnóstico.
-      </div>
 
-      <button class="btn-primary diagnose-btn" id="diagnoseBtn" style="display:none;" disabled>✦ Diagnosticar planta</button>
+      <button class="btn-primary diagnose-btn" id="diagnoseBtn" style="display:none;" disabled>✦ Identificar com Pl@ntNet</button>
       <div class="loading" id="loadingBox" style="display:none;">
-        <div class="left">
-          <div class="spinner"></div>
-          <span id="loadingText">Analisando folhas, terra e sinais de luz…</span>
-        </div>
-        <button class="btn-cancel" id="cancelBtn" type="button">Cancelar</button>
+        <div class="spinner"></div>
+        <span>Consultando a base botânica da Pl@ntNet…</span>
       </div>
       <div id="errorBox"></div>
     </div>
@@ -817,58 +299,24 @@
     <div id="resultsArea" style="display:none;">
       <div class="card">
         <span class="step-tag">Resultado</span>
-        <img class="result-photo" id="resultPhoto" style="display:none;" alt="Foto analisada" />
+        <img class="result-photo" id="resultPhoto" alt="Foto analisada" />
         <div class="health-banner">
           <div>
-            <h2 id="healthTitle">—</h2>
-            <div class="id" id="plantId"></div>
+            <h2 id="plantName">—</h2>
+            <div class="id" id="scientificName"></div>
           </div>
           <div class="conf-chip" id="confChip"></div>
         </div>
 
         <div class="diag-grid" id="diagGrid"></div>
-
-        <details id="notesDetails" style="display:none;">
-          <summary>Outros sinais observados</summary>
-          <ul class="notes" id="notesList"></ul>
-        </details>
-      </div>
-
-      <div class="disclaimer">
-        <b>Sobre este diagnóstico:</b> é uma leitura visual automatizada a partir de uma única foto — histórico de rega, clima local e pragas nem sempre aparecem na imagem. Use como primeiro direcionamento; em caso de dúvida persistente, consulte um viveiro local ou agrônomo.
       </div>
     </div>
-
-    <!-- HISTÓRICO -->
-    <div class="card" id="historicoCard" style="margin-top:28px;">
-      <div class="historico-header">
-        <h2>
-          📋 Histórico
-          <span class="badge-count" id="historicoCount">0</span>
-        </h2>
-        <div style="display:flex; gap:8px;">
-          <button class="btn-secondary" id="toggleHistoricoBtn" style="padding:8px 16px; font-size:12px;">
-            Mostrar
-          </button>
-          <button class="btn-secondary" id="limparHistoricoBtn" style="padding:8px 16px; font-size:12px; color:var(--rust); border-color:var(--rust-light);">
-            Limpar
-          </button>
-        </div>
-      </div>
-      <div id="historicoContainer" style="display:none;">
-        <div class="historico-lista" id="historicoLista">
-          <!-- itens serão inseridos aqui -->
-        </div>
-      </div>
-    </div>
-
-    <footer>Diagnóstico gerado por modelo de visão · nenhuma foto é armazenada</footer>
   </div>
 
   <script>
-    // ============================================================
-    //  ELEMENTOS
-    // ============================================================
+    // CHAVE DA API DA PL@NTNET
+    const API_KEY = "2b10gzJ6Ho9yB91ul5Wd32w";
+
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const capturedImg = document.getElementById('capturedImg');
@@ -879,222 +327,14 @@
     const fileInput = document.getElementById('fileInput');
     const diagnoseBtn = document.getElementById('diagnoseBtn');
     const loadingBox = document.getElementById('loadingBox');
-    const loadingText = document.getElementById('loadingText');
-    const cancelBtn = document.getElementById('cancelBtn');
     const errorBox = document.getElementById('errorBox');
     const resultsArea = document.getElementById('resultsArea');
     const resultPhoto = document.getElementById('resultPhoto');
 
-    const historicoContainer = document.getElementById('historicoContainer');
-    const historicoLista = document.getElementById('historicoLista');
-    const historicoCount = document.getElementById('historicoCount');
-    const historicoBadge = document.getElementById('historicoBadge');
-    const toggleHistoricoBtn = document.getElementById('toggleHistoricoBtn');
-    const limparHistoricoBtn = document.getElementById('limparHistoricoBtn');
-
     let stream = null;
-    let currentImageBase64 = null;
-    let currentMediaType = 'image/jpeg';
-    let historico = [];
-    let currentAbortController = null;
-    const STORAGE_KEY = 'frondly_historico';
+    let selectedBlob = null;
 
-    // Obtém a API Key do arquivo config.js
-    const API_KEY = (typeof CONFIG !== 'undefined' && CONFIG.API_KEY) ? CONFIG.API_KEY : '';
-
-    // ============================================================
-    //  LOADING MESSAGES
-    // ============================================================
-    const LOADING_MESSAGES = [
-      'Observando a cor das folhas…',
-      'Checando sinais de água e luz…',
-      'Avaliando o volume de terra no vaso…',
-      'Montando as recomendações…'
-    ];
-    let loadingInterval = null;
-
-    // ============================================================
-    //  HISTÓRICO - PERSISTÊNCIA
-    // ============================================================
-    function carregarHistorico() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          historico = JSON.parse(raw);
-          historico = historico.filter(item => item && item.timestamp);
-          historico.sort((a, b) => b.timestamp - a.timestamp);
-        } else {
-          historico = [];
-        }
-      } catch (_) {
-        historico = [];
-      }
-      atualizarContadores();
-    }
-
-    function salvarHistorico() {
-      try {
-        if (historico.length > 50) {
-          historico = historico.slice(0, 50);
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(historico));
-      } catch (_) {}
-      atualizarContadores();
-    }
-
-    function atualizarContadores() {
-      const total = historico.length;
-      historicoCount.textContent = total;
-      historicoBadge.textContent = total;
-    }
-
-    async function adicionarAoHistorico(diagnosis, imagemBase64) {
-      let thumb = null;
-      try {
-        thumb = await gerarThumbnail(imagemBase64);
-      } catch (_) {
-        thumb = null;
-      }
-      const entrada = {
-        timestamp: Date.now(),
-        imagem: thumb,
-        saude_geral: diagnosis.saude_geral || 'Diagnóstico concluído',
-        planta_identificada: diagnosis.planta_identificada || null,
-        agua: diagnosis.agua || { status: 'indeterminado', diagnostico: '', acao: '' },
-        luz: diagnosis.luz || { status: 'indeterminado', diagnostico: '', acao: '' },
-        solo: diagnosis.solo_vaso || { status: 'indeterminado', diagnostico: '', acao: '' },
-        confianca: diagnosis.confianca || 'media',
-        outros: diagnosis.outros_sintomas || []
-      };
-      historico.unshift(entrada);
-      salvarHistorico();
-      renderizarHistorico();
-    }
-
-    function gerarThumbnail(base64) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const c = document.createElement('canvas');
-            c.width = 100;
-            c.height = 100;
-            const ctx = c.getContext('2d');
-            const side = Math.min(img.width, img.height);
-            const sx = (img.width - side) / 2;
-            const sy = (img.height - side) / 2;
-            ctx.drawImage(img, sx, sy, side, side, 0, 0, 100, 100);
-            resolve(c.toDataURL('image/jpeg', 0.7));
-          } catch (e) {
-            reject(e);
-          }
-        };
-        img.onerror = () => reject(new Error('Falha ao carregar imagem para thumbnail'));
-        img.src = 'data:image/jpeg;base64,' + base64;
-      });
-    }
-
-    function renderizarHistorico() {
-      if (historico.length === 0) {
-        historicoLista.innerHTML = `
-          <div class="historico-vazio">
-            <span class="emoji">🌿</span>
-            Nenhum diagnóstico salvo ainda.<br>
-            Tire uma foto e faça sua primeira análise!
-          </div>
-        `;
-        return;
-      }
-      let html = '';
-      historico.forEach((item, idx) => {
-        const dataStr = new Date(item.timestamp).toLocaleString('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        const especie = item.planta_identificada || 'Espécie não identificada';
-        const statusAgua = item.agua?.status || 'indeterminado';
-        const statusLuz = item.luz?.status || 'indeterminado';
-        const statusSolo = item.solo?.status || 'indeterminado';
-
-        const iconAgua = { 'adequada': '💧✓', 'baixa': '💧↓', 'excesso': '💧↑', 'indeterminado': '💧?' } [statusAgua] || '💧?';
-        const iconLuz = { 'adequada': '☀️✓', 'pouca': '☀️↓', 'excesso': '☀️↑', 'indeterminado': '☀️?' } [statusLuz] || '☀️?';
-        const iconSolo = { 'terra_adequada': '🪴✓', 'pouca_terra': '🪴↓', 'terra_em_excesso': '🪴↑', 'vaso_pequeno': '🪴↗', 'indeterminado': '🪴?' } [statusSolo] || '🪴?';
-        const thumbSrc = item.imagem || '';
-
-        html += `
-          <div class="historico-item" data-index="${idx}">
-            ${thumbSrc
-              ? `<img class="thumb" src="${thumbSrc}" alt="thumbnail" loading="lazy">`
-              : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🌿</div>`}
-            <div class="info">
-              <div class="data">${dataStr}</div>
-              <div class="resumo">${escapeHtml(item.saude_geral)}</div>
-              <div class="tags">
-                <span>${iconAgua}</span>
-                <span>${iconLuz}</span>
-                <span>${iconSolo}</span>
-                <span>${escapeHtml(especie)}</span>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-      historicoLista.innerHTML = html;
-
-      document.querySelectorAll('.historico-item').forEach(el => {
-        el.addEventListener('click', function() {
-          const idx = parseInt(this.dataset.index, 10);
-          const item = historico[idx];
-          if (item) {
-            const diag = {
-              saude_geral: item.saude_geral,
-              planta_identificada: item.planta_identificada,
-              agua: item.agua,
-              luz: item.luz,
-              solo_vaso: item.solo,
-              confianca: item.confianca,
-              outros_sintomas: item.outros
-            };
-            renderDiagnosis(diag, item.imagem || null);
-            resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        });
-      });
-    }
-
-    function toggleHistorico() {
-      const isVisible = historicoContainer.style.display !== 'none';
-      historicoContainer.style.display = isVisible ? 'none' : 'block';
-      toggleHistoricoBtn.textContent = isVisible ? 'Mostrar' : 'Esconder';
-      if (!isVisible) {
-        renderizarHistorico();
-      }
-    }
-
-    function limparHistorico() {
-      if (confirm('Tem certeza que deseja apagar todo o histórico?')) {
-        historico = [];
-        salvarHistorico();
-        renderizarHistorico();
-      }
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    // ============================================================
-    //  CÂMERA / IMAGEM
-    // ============================================================
+    // CONTROLE DA CÂMERA
     startCam.addEventListener('click', async () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -1104,75 +344,50 @@
         startCam.style.display = 'none';
         shootBtn.style.display = 'inline-flex';
       } catch (err) {
-        let msg = 'Não foi possível acessar a câmera. Use "Enviar foto" para escolher uma imagem da galeria.';
-        if (err && err.name === 'NotAllowedError') {
-          msg = 'Permissão de câmera negada. Habilite a câmera nas configurações do seu navegador ou use "Enviar foto".';
-        }
-        showError(msg);
+        showError('Erro ao acessar a câmera. Tente enviar um arquivo.');
       }
     });
 
     shootBtn.addEventListener('click', () => {
-      if (!stream) return;
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-      currentImageBase64 = dataUrl.split(',')[1];
-      currentMediaType = 'image/jpeg';
-
-      capturedImg.src = dataUrl;
-      capturedImg.style.display = 'block';
-      video.style.display = 'none';
-
-      stopStream();
-
-      shootBtn.style.display = 'none';
-      resetBtn.style.display = 'inline-flex';
-      diagnoseBtn.style.display = 'inline-flex';
-      diagnoseBtn.disabled = false;
-      errorBox.innerHTML = '';
+      canvas.toBlob((blob) => {
+        selectedBlob = blob;
+        capturedImg.src = URL.createObjectURL(blob);
+        capturedImg.style.display = 'block';
+        video.style.display = 'none';
+        stopStream();
+        shootBtn.style.display = 'none';
+        resetBtn.style.display = 'inline-flex';
+        diagnoseBtn.style.display = 'inline-flex';
+        diagnoseBtn.disabled = false;
+      }, 'image/jpeg');
     });
 
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      currentMediaType = file.type || 'image/jpeg';
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const dataUrl = evt.target.result;
-        currentImageBase64 = dataUrl.split(',')[1];
-        capturedImg.src = dataUrl;
-        capturedImg.style.display = 'block';
-        camEmpty.style.display = 'none';
-        video.style.display = 'none';
+      selectedBlob = file;
+      capturedImg.src = URL.createObjectURL(file);
+      capturedImg.style.display = 'block';
+      camEmpty.style.display = 'none';
+      video.style.display = 'none';
+      stopStream();
 
-        stopStream();
-        startCam.style.display = 'none';
-        shootBtn.style.display = 'none';
-        resetBtn.style.display = 'inline-flex';
-        diagnoseBtn.style.display = 'inline-flex';
-        diagnoseBtn.disabled = false;
-        errorBox.innerHTML = '';
-      };
-      reader.readAsDataURL(file);
+      startCam.style.display = 'none';
+      shootBtn.style.display = 'none';
+      resetBtn.style.display = 'inline-flex';
+      diagnoseBtn.style.display = 'inline-flex';
+      diagnoseBtn.disabled = false;
     });
 
-    resetBtn.addEventListener('click', resetCapture);
-
-    function stopStream() {
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-        stream = null;
-      }
-    }
-
-    function resetCapture() {
+    resetBtn.addEventListener('click', () => {
       stopStream();
-      currentImageBase64 = null;
+      selectedBlob = null;
       capturedImg.style.display = 'none';
       video.style.display = 'none';
       camEmpty.style.display = 'flex';
@@ -1181,205 +396,90 @@
       resetBtn.style.display = 'none';
       diagnoseBtn.style.display = 'none';
       diagnoseBtn.disabled = true;
-      fileInput.value = '';
-      errorBox.innerHTML = '';
+    });
+
+    function stopStream() {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
     }
 
     function showError(msg) {
-      errorBox.innerHTML = `<div class="error-box">${escapeHtml(msg)}</div>`;
+      errorBox.innerHTML = `<div class="error-box">${msg}</div>`;
     }
 
-    // ============================================================
-    //  DIAGNOSTICO VIA API
-    // ============================================================
+    // CHAMADA À API PL@NTNET
     diagnoseBtn.addEventListener('click', async () => {
-      if (!currentImageBase64) return;
-      if (!API_KEY) {
-        showError('Chave de API não configurada. Certifique-se de que o arquivo config.js existe com a sua API_KEY.');
-        return;
-      }
+      if (!selectedBlob) return;
 
       diagnoseBtn.disabled = true;
       loadingBox.style.display = 'flex';
       errorBox.innerHTML = '';
       resultsArea.style.display = 'none';
 
-      let msgIdx = 0;
-      loadingText.textContent = LOADING_MESSAGES[0];
-      loadingInterval = setInterval(() => {
-        msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
-        loadingText.textContent = LOADING_MESSAGES[msgIdx];
-      }, 2500);
-
-      currentAbortController = new AbortController();
-
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+        const formData = new FormData();
+        formData.append('images', selectedBlob);
+        formData.append('organs', 'auto');
+
+        const response = await fetch(`https://my-api.plantnet.org/v2/identify/all?api-key=${API_KEY}&lang=pt`, {
           method: 'POST',
-          signal: currentAbortController.signal,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                {
-                  text: `Você é um agrônomo e botânico especialista. Analise a foto da planta e retorne APENAS um objeto JSON válido (sem tags de código Markdown ou caracteres adicionais), contendo os seguintes campos:
-                  {
-                    "planta_identificada": "Nome comum da planta se visível",
-                    "saude_geral": "Diagnóstico geral resumido da planta",
-                    "confianca": "alta|media|baixa",
-                    "agua": {
-                      "status": "adequada|baixa|excesso|indeterminado",
-                      "diagnostico": "Explicação breve visual sobre o sinal de rega",
-                      "acao": "Recomendação prática de rega"
-                    },
-                    "luz": {
-                      "status": "adequada|pouca|excesso|indeterminado",
-                      "diagnostico": "Explicação breve visual sobre a luz recebida",
-                      "acao": "Recomendação prática sobre posicionamento de luz"
-                    },
-                    "solo_vaso": {
-                      "status": "terra_adequada|pouca_terra|terra_em_excesso|vaso_pequeno|indeterminado",
-                      "diagnostico": "Análise da terra e vaso",
-                      "acao": "O que ajustar no solo ou vaso"
-                    },
-                    "outros_sintomas": ["lista de outros detalhes notados nas folhas, pragas ou tronco"]
-                  }`
-                },
-                {
-                  inline_data: {
-                    mime_type: currentMediaType,
-                    data: currentImageBase64
-                  }
-                }
-              ]
-            }]
-          })
+          body: formData
         });
 
-        if (!response.ok) {
-          throw new Error(`Erro na API (${response.status})`);
-        }
+        if (!response.ok) throw new Error(`Erro na consulta (${response.status})`);
 
         const data = await response.json();
-        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         
-        if (!rawText) throw new Error('Não foi possível obter resposta da IA.');
+        if (!data.results || data.results.length === 0) {
+          throw new Error('Nenhuma planta identificada na imagem.');
+        }
 
-        // Limpeza de marcações markdown ```json ... ``` caso a API retorne
-        const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const diagnosis = JSON.parse(cleanedText);
-
-        renderDiagnosis(diagnosis, currentImageBase64);
-        await adicionarAoHistorico(diagnosis, currentImageBase64);
+        renderPlantNetResults(data.results[0]);
 
       } catch (err) {
-        if (err.name !== 'AbortError') {
-          showError(err.message || 'Falha ao processar o diagnóstico. Tente novamente.');
-        }
+        showError(err.message || 'Falha ao processar a identificação.');
       } finally {
-        clearInterval(loadingInterval);
         loadingBox.style.display = 'none';
         diagnoseBtn.disabled = false;
-        currentAbortController = null;
       }
     });
 
-    cancelBtn.addEventListener('click', () => {
-      if (currentAbortController) {
-        currentAbortController.abort();
-      }
-    });
+    function renderPlantNetResults(bestMatch) {
+      const score = Math.round(bestMatch.score * 100);
+      const commonNames = bestMatch.species.commonNames || [];
+      const nomeComum = commonNames.length > 0 ? commonNames[0] : bestMatch.species.scientificNameWithoutAuthor;
+      const nomeCientifico = bestMatch.species.scientificNameWithoutAuthor;
 
-    // ============================================================
-    //  RENDERIZAÇÃO DOS RESULTADOS
-    // ============================================================
-    function renderDiagnosis(diag, imageSrc) {
-      const healthTitle = document.getElementById('healthTitle');
-      const plantId = document.getElementById('plantId');
+      document.getElementById('plantName').textContent = nomeComum;
+      document.getElementById('scientificName').textContent = `Nome científico: ${nomeCientifico} (Família: ${bestMatch.species.family.scientificNameWithoutAuthor})`;
+      
       const confChip = document.getElementById('confChip');
-      const diagGrid = document.getElementById('diagGrid');
-      const notesDetails = document.getElementById('notesDetails');
-      const notesList = document.getElementById('notesList');
+      confChip.textContent = `${score}% de certeza`;
+      if (score > 60) confChip.className = 'conf-chip conf-alta';
+      else if (score > 30) confChip.className = 'conf-chip conf-media';
+      else confChip.className = 'conf-chip conf-baixa';
 
-      if (imageSrc) {
-        resultPhoto.src = imageSrc.startsWith('data:') ? imageSrc : 'data:image/jpeg;base64,' + imageSrc;
-        resultPhoto.style.display = 'block';
-      } else {
-        resultPhoto.style.display = 'none';
-      }
+      resultPhoto.src = capturedImg.src;
 
-      healthTitle.textContent = diag.saude_geral || 'Diagnóstico Concluído';
-      plantId.textContent = diag.planta_identificada ? `Espécie provável: ${diag.planta_identificada}` : 'Espécie não identificada';
-
-      const conf = (diag.confianca || 'media').toLowerCase();
-      confChip.textContent = `Confiança ${conf}`;
-      confChip.className = `conf-chip conf-${conf}`;
-
-      let gridHtml = '';
-
-      // Água
-      gridHtml += renderDiagCard('Água / Rega', '💧', diag.agua, {
-        'adequada': { css: 'status-ok', badge: 'Adequada' },
-        'baixa': { css: 'status-warn', badge: 'Pouca água' },
-        'excesso': { css: 'status-bad', badge: 'Excesso de água' }
-      });
-
-      // Luz
-      gridHtml += renderDiagCard('Luz Solar', '☀️', diag.luz, {
-        'adequada': { css: 'status-ok', badge: 'Luz Ideal' },
-        'pouca': { css: 'status-warn', badge: 'Pouca luz' },
-        'excesso': { css: 'status-bad', badge: 'Excesso de sol' }
-      });
-
-      // Solo/Vaso
-      gridHtml += renderDiagCard('Solo / Vaso', '🪴', diag.solo_vaso, {
-        'terra_adequada': { css: 'status-ok', badge: 'Adequado' },
-        'pouca_terra': { css: 'status-warn', badge: 'Pouca terra' },
-        'terra_em_excesso': { css: 'status-warn', badge: 'Muito solo' },
-        'vaso_pequeno': { css: 'status-bad', badge: 'Vaso pequeno' }
-      });
-
-      diagGrid.innerHTML = gridHtml;
-
-      // Sinais Adicionais
-      if (diag.outros_sintomas && diag.outros_sintomas.length > 0) {
-        notesList.innerHTML = diag.outros_sintomas.map(s => `<li>${escapeHtml(s)}</li>`).join('');
-        notesDetails.style.display = 'block';
-      } else {
-        notesDetails.style.display = 'none';
-      }
+      document.getElementById('diagGrid').innerHTML = `
+        <div class="diag-item">
+          <div class="head"><div class="icon-badge">🍃</div><div class="name">Espécie</div></div>
+          <p>Identificado como <b>${nomeComum}</b> com base na base de dados da Pl@ntNet.</p>
+        </div>
+        <div class="diag-item">
+          <div class="head"><div class="icon-badge">💧</div><div class="name">Rega Sugerida</div></div>
+          <p>Verifique o solo antes de regar. A maioria das espécies desta família prefere solo levemente úmido sem encharcar.</p>
+        </div>
+        <div class="diag-item">
+          <div class="head"><div class="icon-badge">☀️</div><div class="name">Iluminação</div></div>
+          <p>Mantenha em local iluminado com luz indireta abundante para preservar a saúde das folhas.</p>
+        </div>
+      `;
 
       resultsArea.style.display = 'block';
     }
-
-    function renderDiagCard(titulo, emoji, dados, statusMap) {
-      const st = dados?.status || 'indeterminado';
-      const config = statusMap[st] || { css: 'status-unk', badge: 'Indeterminado' };
-      const diag = dados?.diagnostico || 'Sem observações suficientes.';
-      const acao = dados?.acao || 'Monitore nos próximos dias.';
-
-      return `
-        <div class="diag-item ${config.css}">
-          <div class="head">
-            <div class="icon-badge">${emoji}</div>
-            <div class="name">${escapeHtml(titulo)}</div>
-            <span class="badge">${escapeHtml(config.badge)}</span>
-          </div>
-          <p>${escapeHtml(diag)}</p>
-          <div class="action">
-            <span class="arrow">➔</span>
-            <span>${escapeHtml(acao)}</span>
-          </div>
-        </div>
-      `;
-    }
-
-    // ============================================================
-    //  INICIALIZAÇÃO
-    // ============================================================
-    toggleHistoricoBtn.addEventListener('click', toggleHistorico);
-    limparHistoricoBtn.addEventListener('click', limparHistorico);
-    carregarHistorico();
   </script>
 </body>
 </html>
