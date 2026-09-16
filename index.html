@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frondly — Diagnóstico de Plantas</title>
+  <title>Frondly — Identificação de Plantas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
@@ -253,21 +253,21 @@
     <!-- NAV -->
     <div class="nav-row">
       <div class="brand"><span class="mark">🌱</span>Frondly</div>
-      <div class="nav-pill">Powered by Plant.id API</div>
+      <div class="nav-pill">Powered by Pl@ntNet API</div>
     </div>
 
     <!-- HERO -->
     <div class="hero">
-      <div class="eyebrow-pill"><span class="dot"></span>DIAGNOSTICO FITOSSANITÁRIO</div>
-      <div style="font-size: 34px; font-family: 'Fraunces', serif; font-weight: 600;">Sua planta está doente?</div>
-      <p>Fotografe as manchas, pragas ou folhas amareladas para receber um diagnóstico automático de saúde da sua planta.</p>
+      <div class="eyebrow-pill"><span class="dot"></span>IDENTIFICAÇÃO DE PLANTAS</div>
+      <div style="font-size: 34px; font-family: 'Fraunces', serif; font-weight: 600;">Qual é esta planta?</div>
+      <p>Fotografe as folhas, flores ou frutos para identificar automaticamente a espécie da planta.</p>
     </div>
 
     <!-- CAPTURE CARD -->
     <div class="card">
       <span class="step-tag">Passo 1</span>
       <h2>Envie a foto</h2>
-      <div class="sub">Tire uma foto bem focada da folha, haste ou área com problema.</div>
+      <div class="sub">Tire uma foto bem focada da folha, flor ou fruto da planta.</div>
 
       <div class="cam-frame">
         <div class="cam-empty" id="camEmpty">
@@ -287,10 +287,10 @@
         <button class="btn-secondary" id="resetBtn" style="display:none;">Trocar foto</button>
       </div>
 
-      <button class="btn-primary diagnose-btn" id="diagnoseBtn" style="display:none;" disabled>✦ Diagnosticar Doenças</button>
+      <button class="btn-primary diagnose-btn" id="diagnoseBtn" style="display:none;" disabled>✦ Identificar Planta</button>
       <div class="loading" id="loadingBox" style="display:none;">
         <div class="spinner"></div>
-        <span>Analisando saúde e identificando problemas da planta…</span>
+        <span>Analisando imagem e identificando a espécie…</span>
       </div>
       <div id="errorBox"></div>
     </div>
@@ -298,7 +298,7 @@
     <!-- RESULTS -->
     <div id="resultsArea" style="display:none;">
       <div class="card">
-        <span class="step-tag">Resultado do Diagnóstico</span>
+        <span class="step-tag">Resultado da Identificação</span>
         <img class="result-photo" id="resultPhoto" alt="Foto analisada" />
         <div class="health-banner">
           <div>
@@ -314,9 +314,9 @@
   </div>
 
   <script>
-    // INSIRA SUA CHAVE DA API PLANT.ID AQUI
-    // Cadastre-se gratuitamente em: https://kindwise.com/plant-id
-    const PLANT_ID_KEY = "2b10c26xk57vvV7SUEIYMdFFFO"
+    // CHAVE DA API PL@NTNET
+    const PLANTNET_KEY = "2b10c26xk57vvV7SUEIYMdFFFO";
+
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const capturedImg = document.getElementById('capturedImg');
@@ -408,17 +408,7 @@
       errorBox.innerHTML = `<div class="error-box">${msg}</div>`;
     }
 
-    // Função para converter o Blob/File para Base64 (exigido pela Plant.id)
-    function blobToBase64(blob) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    }
-
-    // CHAMADA Á API DA PLANT.ID (HEALTH ASSESSMENT)
+    // CHAMADA Á API DA PL@NTNET
     diagnoseBtn.addEventListener('click', async () => {
       if (!selectedBlob) return;
 
@@ -428,90 +418,73 @@
       resultsArea.style.display = 'none';
 
       try {
-        const base64Image = await blobToBase64(selectedBlob);
+        const formData = new FormData();
+        formData.append('images', selectedBlob);
+        formData.append('organs', 'leaf');
 
-        const response = await fetch('https://plant.id/api/v3/health_assessment?language=pt', {
+        const response = await fetch(`https://my-api.plantnet.org/v2/identify/all?api-key=${PLANTNET_KEY}&lang=pt`, {
           method: 'POST',
-          headers: {
-            'Api-Key': PLANT_ID_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            images: [base64Image],
-            latitude: 49.207,
-            longitude: 16.608,
-            similar_images: true
-          })
+          body: formData
         });
 
-        if (!response.ok) throw new Error(`Erro na API (${response.status}) - Verifique se inseriu sua chave Plant.id corretamente.`);
-
-        const data = await response.json();
-        
-        if (!data.result) {
-          throw new Error('Não foi possível analisar a imagem enviada.');
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Erro 401: Chave Pl@ntNet negada. Verifique se ativou a opção "expose my API key" no painel.');
+          }
+          throw new Error(`Erro na API Pl@ntNet (${response.status})`);
         }
 
-        renderPlantIdResults(data.result);
+        const data = await response.json();
+
+        if (!data.results || data.results.length === 0) {
+          throw new Error('Não foi possível identificar a planta nesta foto.');
+        }
+
+        renderPlantNetResults(data.results);
 
       } catch (err) {
-        showError(err.message || 'Falha ao processar o diagnóstico.');
+        showError(err.message || 'Falha ao processar a identificação.');
       } finally {
         loadingBox.style.display = 'none';
         diagnoseBtn.disabled = false;
       }
     });
 
-    function renderPlantIdResults(result) {
-      const isHealthy = result.is_healthy ? result.is_healthy.binary : true;
-      const healthScore = Math.round((result.is_healthy ? result.is_healthy.probability : 1) * 100);
+    function renderPlantNetResults(results) {
+      const topMatch = results[0];
+      const speciesName = topMatch.species.scientificNameWithoutAuthor;
+      const commonName = (topMatch.species.commonNames && topMatch.species.commonNames.length > 0) 
+        ? topMatch.species.commonNames[0] 
+        : speciesName;
+      const score = Math.round(topMatch.score * 100);
 
-      const plantSuggestions = result.classification?.suggestions || [];
-      const plantName = plantSuggestions.length > 0 ? plantSuggestions[0].name : 'Planta Desconhecida';
+      document.getElementById('plantName').textContent = commonName;
+      document.getElementById('scientificName').textContent = `Nome científico: ${speciesName}`;
 
-      document.getElementById('plantName').textContent = isHealthy ? 'Planta Saudável' : 'Atenção: Problema Detectado!';
-      document.getElementById('scientificName').textContent = `Espécie detectada: ${plantName}`;
-      
       const confChip = document.getElementById('confChip');
-      if (isHealthy) {
-        confChip.textContent = `Saudável (${healthScore}%)`;
-        confChip.className = 'conf-chip conf-alta';
-      } else {
-        confChip.textContent = `Risco / Doença detectada`;
-        confChip.className = 'conf-chip conf-baixa';
-      }
+      confChip.textContent = `Precisão: ${score}%`;
+      confChip.className = score >= 60 ? 'conf-chip conf-alta' : (score >= 30 ? 'conf-chip conf-media' : 'conf-chip conf-baixa');
 
       resultPhoto.src = capturedImg.src;
 
-      const diseases = result.disease?.suggestions || [];
       let diagHTML = '';
+      results.slice(0, 3).forEach((item) => {
+        const itemScore = Math.round(item.score * 100);
+        const itemScientific = item.species.scientificNameWithoutAuthor;
+        const itemCommon = (item.species.commonNames && item.species.commonNames.length > 0) ? item.species.commonNames[0] : 'Nome popular não listado';
+        const family = item.species.family?.scientificNameWithoutAuthor || 'Não informada';
 
-      if (diseases.length > 0) {
-        diseases.slice(0, 3).forEach(d => {
-          const prob = Math.round(d.probability * 100);
-          const name = d.name || 'Problema não identificado';
-          const details = d.details?.description || 'Recomenda-se isolar a planta e verificar a umidade e luz solar.';
-          const treatment = d.details?.treatment?.chemical?.join(', ') || d.details?.treatment?.biological?.join(', ') || 'Remova folhas afetadas e ajuste a rega.';
-
-          diagHTML += `
-            <div class="diag-item">
-              <div class="head">
-                <div class="icon-badge">🦠</div>
-                <div class="name">${name} (${prob}% prob.)</div>
-              </div>
-              <p><b>Sintomas/Descrição:</b> ${details}</p>
-              <p><b>Tratamento sugerido:</b> ${treatment}</p>
-            </div>
-          `;
-        });
-      } else {
-        diagHTML = `
+        diagHTML += `
           <div class="diag-item">
-            <div class="head"><div class="icon-badge">🌿</div><div class="name">Sem sinais aparentes</div></div>
-            <p>Nenhum sintoma grave de fungo, praga ou deficiência foi encontrado na foto.</p>
+            <div class="head">
+              <div class="icon-badge">🌿</div>
+              <div class="name">${itemCommon} (${itemScore}%)</div>
+            </div>
+            <p><b>Nome Científico:</b> <i>${itemScientific}</i></p>
+            <p><b>Família:</b> ${family}</p>
           </div>
         `;
-      }
+      });
 
       document.getElementById('diagGrid').innerHTML = diagHTML;
       resultsArea.style.display = 'block';
